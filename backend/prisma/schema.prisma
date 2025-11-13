@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id         BigInt        @id @default(autoincrement())
+  nome       String
+  status     TenantStatus  @default(ACTIVE)
+  users      UserTenant[]
+  produtos   Produto[]
+  demandas   Demanda[]
+  tags       Tag[]
+  created_at DateTime      @default(now())
+  updated_at DateTime      @updatedAt
+  deleted_at DateTime?
+}
+
+model User {
+  id             BigInt        @id @default(autoincrement())
+  provider       AuthProvider
+  subject_id     String?
+  email          String        @unique
+  nome           String
+  foto_url       String?
+  status         UserStatus    @default(ACTIVE)
+  password_hash  String?
+  token_version  Int           @default(0)
+  tenants        UserTenant[]
+  demandas_criadas       Demanda[]     @relation("DemandaCriador")
+  demandas_responsavel   Demanda[]     @relation("DemandaResponsavel")
+  anexos         Anexo[]
+  comentarios    Comentario[]
+  created_at     DateTime      @default(now())
+  updated_at     DateTime      @updatedAt
+  deleted_at     DateTime?
+}
+
+model UserTenant {
+  id        BigInt @id @default(autoincrement())
+  user_id   BigInt
+  tenant_id BigInt
+  role      TenantRole
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user   User   @relation(fields: [user_id], references: [id])
+  tenant Tenant @relation(fields: [tenant_id], references: [id])
+
+  @@unique([user_id, tenant_id])
+  @@index([tenant_id])
+  @@index([user_id])
+}
+
+model Produto {
+  id         BigInt    @id @default(autoincrement())
+  tenant_id  BigInt
+  nome       String
+  descricao  String?
+  status     ProdutoStatus @default(ACTIVE)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  tenant Tenant @relation(fields: [tenant_id], references: [id])
+  demandas Demanda[]
+
+  @@index([tenant_id])
+}
+
+model Demanda {
+  id              BigInt        @id @default(autoincrement())
+  tenant_id       BigInt
+  titulo          String
+  descricao       String?
+  tipo            TipoDemanda
+  produto_id      BigInt
+  origem          OrigemDemanda
+  origem_detalhe  String?
+  responsavel_id  BigInt?
+  prioridade      Prioridade    @default(MEDIA)
+  status          StatusDemanda @default(NOVO)
+  criado_por_id   BigInt
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+  deleted_at      DateTime?
+
+  tenant       Tenant        @relation(fields: [tenant_id], references: [id])
+  produto      Produto       @relation(fields: [produto_id], references: [id])
+  responsavel  User?         @relation("DemandaResponsavel", fields: [responsavel_id], references: [id])
+  criado_por   User          @relation("DemandaCriador", fields: [criado_por_id], references: [id])
+  tags         DemandaTag[]
+  anexos       Anexo[]
+  comentarios  Comentario[]
+
+  @@index([tenant_id])
+  @@index([produto_id])
+  @@index([status])
+  @@index([created_at])
+  @@index([responsavel_id])
+}
+
+model Tag {
+  id         BigInt       @id @default(autoincrement())
+  tenant_id  BigInt
+  nome       String
+  created_at DateTime     @default(now())
+
+  tenant    Tenant        @relation(fields: [tenant_id], references: [id])
+  demandas  DemandaTag[]
+
+  @@unique([tenant_id, nome])
+  @@index([tenant_id])
+}
+
+model DemandaTag {
+  demanda_id BigInt
+  tag_id     BigInt
+  created_at DateTime @default(now())
+
+  demanda Demanda @relation(fields: [demanda_id], references: [id])
+  tag     Tag     @relation(fields: [tag_id], references: [id])
+
+  @@id([demanda_id, tag_id])
+  @@index([demanda_id])
+  @@index([tag_id])
+}
+
+model Anexo {
+  id          BigInt   @id @default(autoincrement())
+  demanda_id  BigInt
+  arquivo_url String
+  nome        String
+  tipo_mime   String
+  tamanho     BigInt
+  criado_por_id BigInt
+  created_at  DateTime @default(now())
+
+  demanda    Demanda @relation(fields: [demanda_id], references: [id])
+  criado_por User    @relation(fields: [criado_por_id], references: [id])
+
+  @@index([demanda_id])
+}
+
+model Comentario {
+  id         BigInt   @id @default(autoincrement())
+  demanda_id BigInt
+  usuario_id BigInt
+  texto      String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  demanda Demanda @relation(fields: [demanda_id], references: [id])
+  usuario User    @relation(fields: [usuario_id], references: [id])
+
+  @@index([demanda_id])
+}
+
+enum AuthProvider {
+  AZURE_AD
+  LOCAL
+}
+
+enum TenantRole {
+  CPO
+  PM
+  VIEWER
+}
+
+enum TenantStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ProdutoStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum TipoDemanda {
+  IDEIA
+  PROBLEMA
+  OPORTUNIDADE
+  OUTRO
+}
+
+enum OrigemDemanda {
+  CLIENTE
+  SUPORTE
+  DIRETORIA
+  CS
+  VENDAS
+  INTERNO
+}
+
+enum Prioridade {
+  BAIXA
+  MEDIA
+  ALTA
+  CRITICA
+}
+
+enum StatusDemanda {
+  NOVO
+  RASCUNHO
+  TRIAGEM
+  ARQUIVADO
+}
+

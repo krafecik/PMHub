@@ -1,0 +1,351 @@
+---
+alwaysApply: true
+---
+# Cursor Rules — ProductOps (CPO & PM Hub)
+> **Escopo**: Gestão de produto **até o handoff para PO/DevOps** (ideias, discovery, priorização, documentação, validações, roadmaps e métricas). Nada de gestão de sprint/tarefas dev.
+
+---
+
+## 1) Stack e Padrões Fundamentais
+
+### Front-end
+- **Framework**: Next.js (App Router)
+- **Linguagem**: TypeScript estrito (`"strict": true`)
+- **UI**: Tailwind CSS + Radix UI + Design Tokens customizados
+- **Componentes**: Biblioteca própria baseada em Radix UI com variantes (CVA)
+- **Estado**: Zustand ou React Query (para server cache/requests); evitar Redux salvo casos complexos
+- **Formulários**: React Hook Form + Zod (validação)
+- **Gráficos**: Recharts com design customizado
+- **Animações**: Framer Motion para microinterações
+- **Ícones**: Lucide Icons (consistente e otimizado)
+- **Utilitários**: class-variance-authority (CVA), tailwind-merge, clsx
+- **Temas**: Suporte completo para dark mode com ThemeProvider
+- **Acessibilidade**: respeitar ARIA, contraste WCAG AA, foco visível; usar Radix como base
+- **i18n**: `pt-BR` como padrão; preparar chaves para en-US
+
+### Back-end
+- **Framework**: NestJS (modular, providers, DI)
+- **Linguagem**: TypeScript estrito
+- **ORM**: Prisma (PostgreSQL)
+- **Validação**: Zod ou class-validator (consistência com front)
+- **Arquitetura**: Hexagonal + DDD tático (camadas: domain, application, infra, interface)
+- **Patterns**: CQRS (commands/queries), Event-driven (domínio emite eventos)
+- **Cache**: Redis (dados de leitura/ sessões/ rate-limit)
+- **Mensageria (opcional)**: NATS/ RabbitMQ para eventos de domínio/integrações
+- **Autenticação/Autorização**: OIDC (Azure AD); JWT para web; policies e roles por escopo
+- **Migrações**: Prisma Migrate; versionar
+
+### Infra/DevOps
+- **Deploy**: Fly.io ou Azure App Service
+- **Containers**: Docker + multi-stage build; imagens slim
+- **Observabilidade**: OpenTelemetry (traces, logs, metrics) + Prometheus/Grafana/ELK
+- **Feature Flags**: ConfigCat/Unleash (ou tabela própria)
+- **CDN**: para assets estáticos
+- **CI**: GitHub Actions (lint/test/build/security scan); ambientes `dev`, `stg`, `prd`
+
+---
+
+
+## 3) Domínio, Limites e Linguagem Onipresente
+
+- **Contextos delimitados (Bounded Contexts)**:
+  - `Estrategia`, `Ideias`, `Discovery`, `Planejamento`, `Documentacao`, `Validacao`, `Metricas`, `Governanca`
+- **Entidades chave (IDs numéricos)**: `id_tenant`, `id_produto`, `id_pm`, `id_iniciativa`, `id_ideia`, `id_epico`, `id_feature`, `id_documento`, `id_validacao`, `id_experimento`
+- **Atores**: `CPO`, `PM`, `Stakeholder (leitura)`. *PO/Dev* fora deste sistema.
+- **Invariantes**:
+  - Uma **ideia** deve pertencer a exatamente **um produto** e **um tenant**
+  - Uma **feature** só entra em **Planejamento** se vinculada a **hipótese validada** ou decisão explícita
+  - **Handoff** exige **documentação aprovada** + **validações concluídas**
+
+---
+
+## 4) Arquitetura: Hexagonal + DDD tático + CQRS
+
+- **Domain** (regra de negócio pura): entidades, VOs, agregados, domain services, eventos de domínio
+- **Application**: casos de uso (commands/queries), orquestração, transações, políticas
+- **Infrastructure**: repositórios Prisma, adapters (DB, cache, fila, e-mail, storage)
+- **Interfaces (API)**: REST (preferencial) + Webhooks; GraphQL opcional para leitura
+- **CQRS**: separar `commands` (estado) de `queries` (leitura); event handlers para projeções de leitura
+
+**Padrões**:
+- **SOLID** (ver seção 7)
+- **Idempotência** em commands críticos (de-dup keys)
+- **Outbox Pattern** para eventos (consistência entre DB e fila)
+- **Transactional boundary** por agregado/significante caso de uso
+
+---
+
+## 5) API Design (REST)
+
+- **Versionamento**: prefixo `/v1`
+- **Recursos** (exemplos):
+  - `/v1/produtos`, `/v1/ideias`, `/v1/discovery/hipoteses`, `/v1/planejamento/roadmaps`, `/v1/documentos`, `/v1/validacoes`, `/v1/metricas/kpis`, `/v1/governanca/decisoes`
+- **Query params padrão**: `page`, `page_size (<=100)`, `sort`, `filter[field]=value`
+- **Erros**: JSON estruturado `{ trace_id, code, message, details }`
+- **Autorização**: RBAC por papel + ABAC por `id_tenant` e `id_produto`
+- **Rate-limit**: 60 rpm por token (configurável); `429` com `Retry-After`
+- **Idempotency-Key** em POST críticos
+- **webhooks**: para handoff → `po_handoff.created`, `documento.aprovado`, etc.
+
+**Exemplo de contrato de erro**
+```json
+{
+  "trace_id": "2d5c5d9d…",
+  "code": "validation_failed",
+  "message": "Campos inválidos.",
+  "details": [
+    {"field": "titulo", "issue": "Obrigatório"},
+    {"field": "impacto", "issue": "Deve ser >= 0"}
+  ]
+}
+```
+
+---
+
+## 6) Banco de Dados (PostgreSQL + Prisma)
+
+- **Naming**: `snake_case`, plural para tabelas; chaves primárias `bigserial`
+- **Colunas padrão**: `id_tenant bigint not null`, `created_at timestamptz`, `updated_at timestamptz`, `deleted_at timestamptz null`
+- **Soft delete**: `deleted_at` (usar views para filtrar)
+- **Índices**: por `id_tenant`, `foreign keys`, e campos de busca
+- **Referências** (exemplos de tabelas):
+  - `produtos`, `ideias`, `ideia_insights`, `hipoteses`, `experimentos`, `roadmaps`, `epicos`, `features`, `documentos`, `validacoes`, `decisoes`, `okrs`, `okr_krs`, `kpi_projecoes`
+- **Multi-tenant**: `id_tenant` obrigatório em TODAS as tabelas
+- **Auditoria**: tabelas `_audit` por entidade ou `event_store` (preferível com outbox)
+- **Migrations**: atômicas, com `prisma migrate`; sem `ALTER TABLE` pesados em horário crítico
+
+---
+
+## 7) SOLID & Boas Práticas
+
+- **S (Single Responsibility)**: cada serviço de aplicação resolve um caso de uso; cada agregado mantém integridade de um conjunto coeso
+- **O (Open/Closed)**: invariantes e políticas devem permitir extensão via handlers/eventos, não edição constante
+- **L (Liskov)**: interfaces de domínio não devem surpreender (contratos claros, tipos precisos)
+- **I (Interface Segregation)**: ports pequenos e específicos por caso de uso/adaptador
+- **D (Dependency Inversion)**: domain depende de abstrações; infra injeta implementações via Nest providers
+
+**Outros princípios**:
+- **Clean Architecture**: sem imports de infra dentro de `domain`
+- **Validação**: sempre na borda (DTOs) + regras de negócio no domínio
+- **Erros**: tipos próprios (`DomainError`, `ApplicationError`, `InfraError`) → mapeados para HTTP
+- **Logs estruturados** (JSON) com `trace_id`/`span_id`
+- **Segurança**: secret via `env`, rotate keys, TLS everywhere, headers de segurança, CSP
+- **Perf**: N+1 guardado (use `include/select` do Prisma), índices, caching de leitura, paginação obrigatória
+- **Acessibilidade**: testagem com axe-core; navegação por teclado obrigatória
+- **i18n**: textos no front por chaves; no back apenas mensagens de erro
+
+---
+
+## 8) IA & Automação
+
+- **RAG**: embeddings de documentos (PRDs, RFCs, atas) por `id_tenant`/`id_produto`
+- **Geração**: drafts de PRD/release notes a partir de insights/tickets/reuniões
+- **Privacidade**: nunca enviar dados sensíveis para provedores sem consent/mascara
+- **Observabilidade de IA**: logar prompts/respostas com PII redaction
+
+---
+
+## 9) Padrões de Código, Lint e Testes
+
+- **Code Style**: Prettier + ESLint (front/back), commitlint (Conventional Commits)
+- **Imports**: paths absolutos com `@/` no front e `@core`, `@app`, `@infra` no back
+- **Testing Pyramid**:
+  - **Unit** (Vitest/Jest) — serviços de domínio e casos de uso
+  - **Contract/API** (Supertest + Pact/Prism)
+  - **E2E** (Playwright) — fluxos críticos (ideia→handoff)
+- **Cobertura alvo**: 80%+ em domínio e aplicação
+- **Fixtures/Builders**: para testes de domínio
+- **Seeding**: scripts idempotentes por tenant/ambiente
+
+---
+
+## 10) Versionamento, Branching & PRs
+
+- **Branches**: `main` (prod), `develop` (stg), `feat/*`, `fix/*`, `chore/*`
+- **PRs**: pequenos (< 400 LOC), checklist de acessibilidade, segurança, docs, testes
+- **Conventional Commits**: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `build:`
+- **Code Owners**: exigir 1+ revisor por contexto delimitado
+
+---
+
+## 11) Segurança e Compliance
+
+- **Auth**: OAuth2/OIDC com PKCE no front; tokens curtos; refresh tokens seguros (httpOnly)
+- **RBAC/ABAC**: roles (`CPO`, `PM`, `Viewer`) + regras por `id_tenant`/`id_produto`
+- **Secrets**: `.env` por ambiente, nunca no git; usar Key Vault/Secrets Manager quando possível
+- **Backups**: PostgreSQL diário + restauração automatizada testada
+- **LGPD**: data minimization; consent para feedbacks; anonimizar PII em logs
+
+
+---
+
+## 12) Estrutura de Componentes Front-end
+
+### 12.1) Organização
+```
+frontend/
+├── src/
+│   ├── components/
+│   │   ├── ui/           # Componentes base do design system
+│   │   ├── dashboard/    # Componentes específicos do dashboard  
+│   │   ├── navigation/   # Componentes de navegação
+│   │   └── motion/       # Componentes animados
+│   ├── lib/
+│   │   ├── design-tokens/ # Sistema de design tokens
+│   │   └── utils.ts      # Funções utilitárias
+│   └── providers/        # Context providers
+```
+
+### 12.2) Convenções de Componentes
+- **Props**: Sempre tipadas com interface ou type
+- **ForwardRef**: Usar quando o componente precisa expor ref
+- **Variants**: Usar CVA para componentes com múltiplas variantes
+- **Composição**: Preferir composição sobre props complexas
+- **DisplayName**: Sempre definir para componentes com forwardRef
+
+---
+
+## 13) Design System e UX/UI
+
+### 13.1) Design Tokens
+- **Cores**: Sistema completo com primary (verde esmeralda), secondary (azul slate), accent (azul índigo), semantic colors
+- **Tipografia**: Escala hierárquica com Inter como fonte principal, JetBrains Mono para código
+- **Espaçamentos**: Sistema de 4px base com escala consistente (0.25rem até 24rem)
+- **Sombras**: 8 níveis de elevação + sombras coloridas para elementos especiais
+- **Animações**: Durações padronizadas (50ms a 1000ms) com easing functions customizadas
+- **Bordas**: Radius consistentes (2px a 32px) + full para elementos circulares
+
+### 13.2) Componentes Base
+- **Button**: 7 variantes (default, destructive, outline, secondary, ghost, link, gradient) + estados de loading
+- **Card**: 4 variantes (default, elevated, outline, ghost) com hover states
+- **Badge**: 7 variantes incluindo semantic colors (success, warning, error, info)
+- **Input/Textarea**: Com suporte a erro visual e dark mode
+- **Avatar**: Com fallback para iniciais
+- **Tooltip**: Posicionamento inteligente e animações suaves
+
+### 13.3) Layout e Navegação
+- **AppShell**: Sidebar colapsável com ícones, header fixo com busca global
+- **Navegação**: Hierárquica com sub-menus, indicadores visuais de página ativa
+- **TenantSwitcher**: Dropdown elegante com preview do tenant atual
+- **ThemeToggle**: Alternância entre light/dark/system
+- **Responsividade**: Mobile-first com menu drawer para telas pequenas
+
+### 13.4) Padrões de Interface
+- **Dashboard**: Widgets com métricas animadas, gráficos interativos, timeline de atividades
+- **Listas**: Cards interativos ao invés de tabelas tradicionais, com ações contextuais
+- **Formulários**: Labels flutuantes, validação inline, feedback visual imediato
+- **Estados vazios**: Ilustrados com ícones, mensagens claras e CTAs destacados
+- **Loading states**: Skeletons contextuais, spinners customizados
+- **Microinterações**: Hover states em todos elementos interativos, transições suaves
+
+### 13.5) Animações e Transições
+- **Entrada de componentes**: FadeIn com direção (up, down, left, right)
+- **Listas**: StaggerChildren para entrada sequencial de itens
+- **Hover**: Scale e translate sutis com spring animations
+- **Page transitions**: Suaves com Framer Motion
+- **Feedback**: Animações de sucesso/erro em ações
+
+### 13.6) Dark Mode
+- **Implementação**: CSS variables + Tailwind classes
+- **Persistência**: LocalStorage com respeito a prefers-color-scheme
+- **Componentes**: Todos adaptados com cores específicas para dark mode
+- **Contraste**: Garantido WCAG AA em ambos os temas
+
+### 13.7) Acessibilidade
+- **Focus states**: Visíveis e consistentes com ring de foco
+- **Navegação por teclado**: Completa em todos componentes
+- **ARIA labels**: Em todos elementos interativos
+- **Semântica HTML**: Uso correto de elementos nativos
+- **Contrast ratio**: Mínimo 4.5:1 para texto normal, 3:1 para texto grande
+
+---
+
+## 14) Definição de Pronto (DoR/DoD — lado PM)
+
+- **DoR** (para entrar em Planejamento): problema claro, hipótese, métrica-alvo, público/segmento, risco, alternativas rejeitadas
+- **DoD PM** (para handoff): PRD aprovado, checklists de validação concluídos, impactos mapeados, plano de comunicação, critérios de sucesso & métricas inicializadas
+
+---
+
+## 15) Convenções de Nomenclatura
+
+- **Português-BR** para rótulos/descrições de negócio no front; inglês técnico no código
+- **DB**: `snake_case`; chaves estrangeiras com sufixo `_id`
+- **Enums**: prefixo do contexto, ex: `ideia_status`, `validacao_tipo`
+- **Arquivos**: kebab-case no front (`product-roadmap.tsx`); PascalCase para componentes React
+- **Componentes UI**: Organizados em `/components/ui/` com exports centralizados
+- **Utilitários**: Em `/lib/` incluindo utils.ts com funções helpers
+- **Providers**: Em `/providers/` para contextos globais (Theme, Auth, etc.)
+
+---
+
+## 16) Checklist de Qualidade antes de Merge
+
+- [ ] Lint e testes passando
+- [ ] Cobertura mínima em domínio/aplicação
+- [ ] Migrações revisadas e reversíveis
+- [ ] A11y verificada nas telas novas (contrast ratio, focus states, ARIA)
+- [ ] Componentes seguem padrões do Design System
+- [ ] Dark mode testado e funcionando
+- [ ] Animações respeitam prefers-reduced-motion
+- [ ] Responsividade testada em diferentes viewports
+- [ ] Logs/erros com `trace_id`
+- [ ] Documentação (README/ADR/Decision Log) atualizada
+- [ ] Observabilidade (métricas/alerts) configurada para endpoints/fluxos críticos
+
+---
+
+## 17) Exemplos de Uso Correto
+
+### Componente com variantes (CVA)
+```tsx
+const buttonVariants = cva(
+  'base-classes',
+  {
+    variants: {
+      variant: {
+        default: 'variant-classes',
+      },
+      size: {
+        default: 'size-classes',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  }
+)
+```
+
+### Componente animado
+```tsx
+<FadeIn direction="up" delay={0.2}>
+  <Card variant="elevated">
+    {/* conteúdo */}
+  </Card>
+</FadeIn>
+```
+
+---
+
+## 18) Anti-patterns (NÃO FAZER)
+
+- Colar lógica de persistência dentro do domínio
+- Ignorar `id_tenant` em qualquer camada
+- Expor entidades diretamente na API (usar DTOs/view models)
+- Queries sem paginação/ordenamento
+- Regras de negócio em controllers
+- Feature flags confundidas com RBAC
+- Uploads sem varredura de malware/limite de tamanho
+- Falta de `trace_id` em logs/erros
+- Usar cores/espaçamentos hardcoded ao invés de design tokens
+- Criar componentes sem suporte a dark mode
+- Ignorar estados de hover/focus/active
+- Animações sem respeitar prefers-reduced-motion
+- Componentes sem variantes quando há múltiplos estilos
+- Tabelas tradicionais quando cards seriam mais apropriados
+- Loading sem feedback visual (usar skeletons ou spinners)
+- Formulários sem validação visual inline
+
+## 19) Em todas as telas do software deve haver um botão de ajuda que abre um modal e explica como usa a tela e para que serve aquele controle conforme metodologia de gestão de produtos.

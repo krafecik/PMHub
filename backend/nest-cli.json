@@ -1,0 +1,15 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "entryFile": "main",
+  "compilerOptions": {
+    "tsConfigPath": "tsconfig.build.json",
+    "assets": [
+      {
+        "include": "config/**/*.yml",
+        "watchAssets": true
+      }
+    ]
+  }
+}
+
