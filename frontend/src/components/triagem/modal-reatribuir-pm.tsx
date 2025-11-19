@@ -43,9 +43,7 @@ export function ModalReatribuirPm({
   // Filtrar apenas PMs e CPOs
   const pmsDisponiveis = React.useMemo(() => {
     if (!usuarios) return []
-    return usuarios.filter(
-      (usuario) => usuario.role === 'PM' || usuario.role === 'CPO',
-    )
+    return usuarios.filter((usuario) => usuario.role === 'PM' || usuario.role === 'CPO')
   }, [usuarios])
 
   const mutation = useMutation({
@@ -58,12 +56,12 @@ export function ModalReatribuirPm({
     onSuccess: async () => {
       toast.success('Responsável reatribuído com sucesso.')
       setNovoPmId('')
-      
+
       // Chamar onSuccess antes de fechar o modal
       if (onSuccess) {
         await onSuccess()
       }
-      
+
       // Fechar modal após um pequeno delay para garantir que o toast apareça
       setTimeout(() => {
         onOpenChange(false)

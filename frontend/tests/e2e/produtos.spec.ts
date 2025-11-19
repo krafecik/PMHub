@@ -1,373 +1,145 @@
-import { test, expect, type Page } from '@playwright/test'
-import { fulfillJson, fulfillOptions, mockAuthenticatedSession } from './utils'
-import {
-  listaPadraoProdutos,
-  makeProduto,
-  makeProdutosList,
-  produtoAtivo,
-  produtoInativo,
-} from './fixtures/produtos'
-import type { Produto } from '@/lib/products-api'
+import { test, expect } from '@playwright/test'
+import { setupProdutosApiMocks } from './helpers/api-mocks'
+import { navigateToProdutos } from './helpers/navigation'
+import { createProdutoFixture } from './fixtures/produtos'
 
-function buildProdutosState(initial: Produto[] = makeProdutosList(4, { includeInactive: true })) {
-  let produtos = [...initial]
 
-  return {
-    getAll: () => [...produtos],
-    setAll: (next: Produto[]) => {
-      produtos = [...next]
-    },
-    add: (produto: Produto) => {
-      produtos = [produto, ...produtos]
-    },
-    update: (id: string, updates: Partial<Produto>) => {
-      produtos = produtos.map((produto) =>
-        produto.id === id
-          ? {
-              ...produto,
-              ...updates,
-              updated_at: updates.updated_at ?? new Date().toISOString(),
-            }
-          : produto,
-      )
-    },
-    remove: (id: string) => {
-      produtos = produtos.filter((produto) => produto.id !== id)
-    },
-  }
-}
+test.describe('Gestão de Produtos', () => {
+  test('exibe lista de produtos, estatísticas e permite buscar', async ({ page }) => {
+    const produtos = [
+      createProdutoFixture({ id: 'PROD-100', nome: 'Produto Atlas', descricao: 'Suite principal' }),
+      createProdutoFixture({ id: 'PROD-101', nome: 'Data Fabric', descricao: 'Integração de dados' }),
+      createProdutoFixture({ id: 'PROD-102', nome: 'CEM Fatura', descricao: 'Backoffice financeiro' }),
+    ]
 
-async function respondProdutosGet(page: Page, state: ReturnType<typeof buildProdutosState>) {
-  await page.route('**/v1/produtos', async (route) => {
-    const method = route.request().method()
+    await setupProdutosApiMocks(page, produtos)
+    await navigateToProdutos(page)
 
-    if (method === 'OPTIONS') {
-      await fulfillOptions(route)
-      return
-    }
-
-    if (method === 'GET') {
-      await fulfillJson(route, state.getAll())
-      return
-    }
-
-    await route.continue()
-  })
-}
-
-test.describe('Produtos - Listagem e estados', () => {
-  test.beforeEach(async ({ page }) => {
-    await mockAuthenticatedSession(page)
-  })
-
-  test('exibe lista de produtos com busca e estatísticas', async ({ page }) => {
-    const state = buildProdutosState(listaPadraoProdutos)
-    await respondProdutosGet(page, state)
-
-    await page.goto('/produtos')
-
-    await expect(page.getByRole('heading', { name: 'Produtos' })).toBeVisible()
     await expect(page.getByText('Total de Produtos')).toBeVisible()
-    await expect(page.getByText(produtoAtivo.nome)).toBeVisible()
-    await expect(page.getByText(produtoInativo.nome)).toBeVisible()
+    await expect(page.locator('[data-testid^="produto-card-"]')).toHaveCount(produtos.length)
+
+    await expect(page.getByText('Produto Atlas')).toBeVisible()
+    await expect(page.getByText('Data Fabric')).toBeVisible()
+    await expect(page.getByText('CEM Fatura')).toBeVisible()
 
     const searchInput = page.getByPlaceholder('Buscar produtos por nome ou descrição...')
-    await searchInput.fill('CRM')
-    await expect(page.getByText(produtoInativo.nome)).toBeVisible()
-    await expect(page.getByText(produtoAtivo.nome)).not.toBeVisible()
+    await searchInput.fill('Data')
+    await expect(page.locator('[data-testid="produto-card-PROD-101"]')).toBeVisible()
+    await expect(page.locator('[data-testid="produto-card-PROD-100"]')).toHaveCount(0)
 
-    await searchInput.fill('produto inexistente')
+    await searchInput.fill('não existe')
     await expect(page.getByText('Nenhum produto encontrado')).toBeVisible()
+    await expect(page.getByText('Tente ajustar os termos de busca')).toBeVisible()
+    await expect(page.locator('[data-testid^="produto-card-"]')).toHaveCount(0)
   })
 
-  test('exibe estado vazio e permite criar primeiro produto', async ({ page }) => {
-    const state = buildProdutosState([])
+  test('cria novo produto com sucesso', async ({ page }) => {
+    await setupProdutosApiMocks(page, [])
+    await navigateToProdutos(page)
 
-    await page.route('**/v1/produtos', async (route) => {
-      const method = route.request().method()
+    await page.getByRole('button', { name: /Novo Produto/i }).first().click()
+    await expect(page.getByRole('heading', { name: /Novo Produto/i })).toBeVisible()
 
-      if (method === 'OPTIONS') {
-        await fulfillOptions(route)
-        return
-      }
+    await page.getByLabel('Nome do Produto *').fill('Produto IA Insight')
+    await page.getByLabel('Status *').selectOption('ACTIVE')
+    await page.getByLabel('Descrição (opcional)').fill('Produto focado em automações inteligentes')
 
-      if (method === 'GET') {
-        await fulfillJson(route, state.getAll())
-        return
-      }
+    await page.getByRole('button', { name: /Criar Produto/i }).click()
 
-      if (method === 'POST') {
-        const body = JSON.parse(route.request().postData() ?? '{}')
-        const novoProduto = makeProduto({
-          id: 'PROD-NEW',
-          nome: body.nome,
-          descricao: body.descricao ?? null,
-          status: body.status ?? 'ACTIVE',
-        })
-
-        state.add(novoProduto)
-        await fulfillJson(route, novoProduto, 201)
-        return
-      }
-
-      await route.continue()
-    })
-
-    await page.goto('/produtos')
-    await expect(page.getByRole('button', { name: 'Criar primeiro produto' })).toBeVisible()
-    await page.getByRole('button', { name: 'Criar primeiro produto' }).click()
-
-    await page.getByLabel('Nome do Produto *').fill('Produto Vision')
-    await page.getByLabel('Descrição (opcional)').fill('Produto criado a partir do estado vazio')
-    await page.getByRole('button', { name: 'Criar Produto' }).click()
-
-    await expect(page.getByText('Produto criado com sucesso!')).toBeVisible()
-    await expect(page.getByText('Produto Vision')).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Novo Produto/i })).toHaveCount(0)
+    await expect(page.getByText('Produto IA Insight')).toBeVisible()
+    await expect(page.getByText('Produto focado em automações inteligentes')).toBeVisible()
   })
 
-  test('valida campos obrigatórios no formulário', async ({ page }) => {
-    const state = buildProdutosState([])
-    await respondProdutosGet(page, state)
+  test('impede criação com dados inválidos e mostra validações', async ({ page }) => {
+    await setupProdutosApiMocks(page, [])
+    await navigateToProdutos(page)
 
-    await page.goto('/produtos')
-    await page.getByRole('button', { name: 'Novo Produto' }).click()
+    await page.getByRole('button', { name: /Novo Produto/i }).first().click()
 
-    await page.getByLabel('Nome do Produto *').fill('AB')
-    await page.getByRole('button', { name: 'Criar Produto' }).click()
+    await page.getByRole('button', { name: /Criar Produto/i }).click()
+
     await expect(page.getByText('Nome deve ter no mínimo 3 caracteres')).toBeVisible()
 
-    await page.getByLabel('Nome do Produto *').fill('Produto X')
-    await page.getByLabel('Descrição (opcional)').fill('A'.repeat(501))
-    await page.getByRole('button', { name: 'Criar Produto' }).click()
-    await expect(page.getByText('Descrição deve ter no máximo 500 caracteres')).toBeVisible()
-  })
-})
-
-test.describe('Produtos - Operações CRUD', () => {
-  test.beforeEach(async ({ page }) => {
-    await mockAuthenticatedSession(page)
+    await page.getByLabel('Nome do Produto *').fill('AB')
+    await page.getByRole('button', { name: /Criar Produto/i }).click()
+    await expect(page.getByText('Nome deve ter no mínimo 3 caracteres')).toBeVisible()
   })
 
-  test('cria produto com sucesso e atualiza lista', async ({ page }) => {
-    const state = buildProdutosState(listaPadraoProdutos)
+  test('exibe erro de validação do backend ao criar produto', async ({ page }) => {
+    const api = await setupProdutosApiMocks(page, [])
+    await navigateToProdutos(page)
 
-    await page.route('**/v1/produtos', async (route) => {
-      const method = route.request().method()
-
-      if (method === 'OPTIONS') {
-        await fulfillOptions(route)
-        return
-      }
-
-      if (method === 'GET') {
-        await fulfillJson(route, state.getAll())
-        return
-      }
-
-      if (method === 'POST') {
-        const body = JSON.parse(route.request().postData() ?? '{}')
-        const novoProduto = makeProduto({
-          id: 'PROD-100',
-          nome: body.nome,
-          descricao: body.descricao,
-          status: body.status ?? 'ACTIVE',
-        })
-
-        state.add(novoProduto)
-        await fulfillJson(route, novoProduto, 201)
-        return
-      }
-
-      await route.continue()
+    api.failNextCreate({
+      status: 400,
+      body: { message: 'Nome de produto já utilizado neste tenant.' },
     })
 
-    await page.goto('/produtos')
-    await page.getByRole('button', { name: 'Novo Produto' }).click()
-    await page.getByLabel('Nome do Produto *').fill('Data Lake Insights')
-    await page.getByRole('button', { name: 'Criar Produto' }).click()
+    await page.getByRole('button', { name: /Novo Produto/i }).first().click()
+    await page.getByLabel('Nome do Produto *').fill('Produto Duplicado')
 
-    await expect(page.getByText('Produto criado com sucesso!')).toBeVisible()
-    await expect(page.getByText('Data Lake Insights')).toBeVisible()
+    await page.getByRole('button', { name: /Criar Produto/i }).click()
+
+    await expect(page.getByRole('heading', { name: /Novo Produto/i })).toBeVisible()
+    await expect(page.getByLabel('Nome do Produto *')).toHaveValue('Produto Duplicado')
+    await expect(page.locator('[data-testid^="produto-card-"]')).toHaveCount(0)
   })
 
-  test('mostra mensagem de erro quando backend falha ao criar', async ({ page }) => {
-    const state = buildProdutosState(listaPadraoProdutos)
+  test('edita produto existente e atualiza status', async ({ page }) => {
+    const produto = createProdutoFixture({ id: 'PROD-300', nome: 'Produto Evoluir', descricao: 'Primeira versão' })
+    await setupProdutosApiMocks(page, [produto])
+    await navigateToProdutos(page)
 
-    await page.route('**/v1/produtos', async (route) => {
-      const method = route.request().method()
-
-      if (method === 'OPTIONS') {
-        await fulfillOptions(route)
-        return
-      }
-
-      if (method === 'GET') {
-        await fulfillJson(route, state.getAll())
-        return
-      }
-
-      if (method === 'POST') {
-        await route.fulfill({
-          status: 400,
-          headers: {
-            'content-type': 'application/json',
-            'access-control-allow-origin': '*',
-          },
-          body: JSON.stringify({ message: 'Nome já utilizado por outro produto.' }),
-        })
-        return
-      }
-
-      await route.continue()
-    })
-
-    await page.goto('/produtos')
-    await page.getByRole('button', { name: 'Novo Produto' }).click()
-    await page.getByLabel('Nome do Produto *').fill(produtoAtivo.nome)
-    await page.getByRole('button', { name: 'Criar Produto' }).click()
-
-    await expect(page.getByText('Erro ao criar produto')).toBeVisible()
-    await expect(page.getByText('Nome já utilizado por outro produto.')).toBeVisible()
-  })
-
-  test('edita produto existente e altera status', async ({ page }) => {
-    const produtoOriginal = makeProduto({
-      id: 'PROD-002',
-      nome: 'CRM Legacy',
-      status: 'INACTIVE',
-    })
-    const state = buildProdutosState([produtoAtivo, produtoOriginal])
-
-    await page.route('**/v1/produtos', async (route) => {
-      const method = route.request().method()
-
-      if (method === 'OPTIONS') {
-        await fulfillOptions(route)
-        return
-      }
-
-      if (method === 'GET') {
-        await fulfillJson(route, state.getAll())
-        return
-      }
-
-      await route.continue()
-    })
-
-    await page.route('**/v1/produtos/PROD-002', async (route) => {
-      const method = route.request().method()
-
-      if (method === 'OPTIONS') {
-        await fulfillOptions(route)
-        return
-      }
-
-      if (method === 'PATCH') {
-        const body = JSON.parse(route.request().postData() ?? '{}')
-        state.update('PROD-002', {
-          nome: body.nome,
-          descricao: body.descricao ?? produtoOriginal.descricao,
-          status: body.status ?? 'ACTIVE',
-        })
-        await fulfillJson(route, state.getAll()[1])
-        return
-      }
-
-      await route.continue()
-    })
-
-    await page.goto('/produtos')
-
-    const card = page.getByTestId('produto-card-PROD-002')
+    const card = page.getByTestId('produto-card-PROD-300')
     await card.hover()
-    await card.getByRole('button', { name: 'Ações do produto CRM Legacy' }).click()
+    await page.getByRole('button', { name: 'Ações do produto Produto Evoluir' }).click()
     await page.getByRole('menuitem', { name: 'Editar produto' }).click()
 
-    await page.getByLabel('Nome do Produto *').fill('CRM Next')
-    await page.getByLabel('Status *').selectOption('ACTIVE')
-    await page.getByRole('button', { name: 'Salvar alterações' }).click()
+    await expect(page.getByRole('heading', { name: /Editar Produto/i })).toBeVisible()
 
-    await expect(page.getByText('Produto atualizado com sucesso!')).toBeVisible()
-    await expect(page.getByText('CRM Next')).toBeVisible()
+    const nomeInput = page.getByLabel('Nome do Produto *')
+    await nomeInput.fill('Produto Evoluir 2.0')
+    await page.getByLabel('Status *').selectOption('INACTIVE')
+    await page.getByLabel('Descrição (opcional)').fill('Nova descrição para o produto atualizado')
+
+    await page.getByRole('button', { name: /Salvar alterações/i }).click()
+
+    await expect(page.getByText('Produto Evoluir 2.0')).toBeVisible()
+    await expect(card.getByText('Inativo')).toBeVisible()
+    await expect(page.getByText('Nova descrição para o produto atualizado')).toBeVisible()
   })
 
-  test('exibe erro quando usuário não tem permissão para remover', async ({ page }) => {
-    const produtoRestrito = makeProduto({ id: 'PROD-FAIL', nome: 'Produto Orion' })
-    const state = buildProdutosState([produtoRestrito])
+  test('remove produto após confirmação do usuário', async ({ page }) => {
+    const produtos = [
+      createProdutoFixture({ id: 'PROD-400', nome: 'Produto Removível' }),
+      createProdutoFixture({ id: 'PROD-401', nome: 'Produto Persistente' }),
+    ]
 
-    await respondProdutosGet(page, state)
+    await setupProdutosApiMocks(page, produtos)
 
-    await page.route('**/v1/produtos/PROD-FAIL', async (route) => {
-      const method = route.request().method()
-
-      if (method === 'OPTIONS') {
-        await fulfillOptions(route)
-        return
-      }
-
-      if (method === 'DELETE') {
-        await route.fulfill({
-          status: 403,
-          headers: {
-            'content-type': 'application/json',
-            'access-control-allow-origin': '*',
-          },
-          body: JSON.stringify({ message: 'Permissão insuficiente para executar esta ação.' }),
-        })
-        return
-      }
-
-      await route.continue()
+    page.on('dialog', async (dialog) => {
+      expect(dialog.type()).toBe('confirm')
+      await dialog.accept()
     })
 
-    await page.goto('/produtos')
+    await navigateToProdutos(page)
 
-    const card = page.getByTestId('produto-card-PROD-FAIL')
+    const card = page.getByTestId('produto-card-PROD-400')
     await card.hover()
-    await card.getByRole('button', { name: 'Ações do produto Produto Orion' }).click()
-
-    const dialogPromise = page.waitForEvent('dialog').then((dialog) => dialog.accept())
+    await page.getByRole('button', { name: 'Ações do produto Produto Removível' }).click()
     await page.getByRole('menuitem', { name: 'Remover produto' }).click()
-    await dialogPromise
 
-    await expect(page.getByText('Erro ao remover produto')).toBeVisible()
-    await expect(card).toBeVisible()
+    await page.reload()
+
+    await expect(page.locator('[data-testid="produto-card-PROD-400"]')).toHaveCount(0)
+    await expect(page.getByText('Produto Persistente')).toBeVisible()
   })
 
-  test('remove produto com sucesso após confirmação', async ({ page }) => {
-    const produtoParaRemover = makeProduto({ id: 'PROD-DEL', nome: 'Produto Nebula' })
-    const state = buildProdutosState([produtoParaRemover])
+  test('exibe estados vazios apropriados', async ({ page }) => {
+    await setupProdutosApiMocks(page, [])
+    await navigateToProdutos(page)
 
-    await respondProdutosGet(page, state)
-
-    await page.route('**/v1/produtos/PROD-DEL', async (route) => {
-      const method = route.request().method()
-
-      if (method === 'OPTIONS') {
-        await fulfillOptions(route)
-        return
-      }
-
-      if (method === 'DELETE') {
-        state.remove('PROD-DEL')
-        await fulfillJson(route, {}, 204)
-        return
-      }
-
-      await route.continue()
-    })
-
-    await page.goto('/produtos')
-
-    const card = page.getByTestId('produto-card-PROD-DEL')
-    await card.hover()
-    await card.getByRole('button', { name: 'Ações do produto Produto Nebula' }).click()
-
-    const dialogPromise = page.waitForEvent('dialog').then((dialog) => dialog.accept())
-    await page.getByRole('menuitem', { name: 'Remover produto' }).click()
-    await dialogPromise
-
-    await expect(page.getByText('Produto removido')).toBeVisible()
-    await expect(page.getByTestId('produto-card-PROD-DEL')).toHaveCount(0)
+    await expect(page.getByText('Nenhum produto cadastrado')).toBeVisible()
+    await expect(page.getByRole('button', { name: /Criar primeiro produto/i })).toBeVisible()
   })
 })

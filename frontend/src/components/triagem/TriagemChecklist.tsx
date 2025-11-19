@@ -40,8 +40,8 @@ export function TriagemChecklist({
 
   // Estado para controlar quais itens foram marcados manualmente pelo usuário
   // Se initialChecked for fornecido, usa ele como estado inicial
-  const [checkedItems, setCheckedItems] = React.useState<Set<string>>(() => 
-    initialChecked ? new Set(initialChecked) : new Set()
+  const [checkedItems, setCheckedItems] = React.useState<Set<string>>(() =>
+    initialChecked ? new Set(initialChecked) : new Set(),
   )
 
   // Ref para rastrear o último initialChecked recebido e evitar sincronizações desnecessárias
@@ -52,7 +52,7 @@ export function TriagemChecklist({
     if (initialChecked !== undefined) {
       const newArray = Array.from(initialChecked).sort()
       const newKey = JSON.stringify(newArray)
-      
+
       // Só atualiza se o initialChecked realmente mudou
       if (lastInitialCheckedRef.current !== newKey) {
         lastInitialCheckedRef.current = newKey

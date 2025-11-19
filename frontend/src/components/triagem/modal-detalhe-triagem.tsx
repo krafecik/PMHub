@@ -214,66 +214,11 @@ export function ModalDetalheTriagem({
       }
     : null
 
-  // Mutation para salvar a triagem primeiro
-  const salvarTriagemMutation = useMutation({
-    mutationFn: async () => {
-      if (!demandaOriginal || !onTriar) return
-
-      const payload: TriarDemandaPayload = {
-        novoStatus: 'PRONTO_DISCOVERY',
-        impacto: impacto || undefined,
-        urgencia: urgencia || undefined,
-        complexidade: complexidade || undefined,
-        observacoes: observacoes && !isHtmlEmpty(observacoes) ? observacoes : undefined,
-      }
-
-      return onTriar(demandaOriginal.id, payload)
-    },
-  })
-
-  // Mutation para evoluir para Discovery
-  const evoluirDiscoveryMutation = useMutation({
-    mutationFn: async () => {
-      if (!demandaOriginal) return
-      return evoluirParaDiscovery(demandaOriginal.id)
-    },
-    onSuccess: async (data) => {
-      // Invalidar queries para atualizar a lista
-      await queryClient.invalidateQueries({ queryKey: ['triagem'] })
-      await queryClient.invalidateQueries({ queryKey: ['demandas'] })
-      
-      toast.success('Demanda enviada para Discovery', {
-        description: data?.discoveryId ? `ID Discovery: ${data.discoveryId}` : undefined,
-      })
-      
-      // Fechar modal após um pequeno delay para garantir que o toast apareça
-      setTimeout(() => {
-        onOpenChange(false)
-      }, 100)
-    },
-    onError: (error: any) => {
-      console.error('Erro ao evoluir para Discovery:', error)
-      const errorData = error?.response?.data || error?.data
-      const errorMessage = errorData?.message || error?.message || 'Erro ao enviar demanda para Discovery'
-      const errorDetails = errorData?.details
-      
-      if (errorDetails && Array.isArray(errorDetails)) {
-        const issues = errorDetails.map((d: any) => `• ${d.issue || d.message || ''}`).join('\n')
-        toast.error('Triagem incompleta', {
-          description: issues || errorMessage,
-          duration: 5000,
-        })
-      } else {
-        toast.error(errorMessage)
-      }
-    },
-  })
-
   // Mutation combinada: salvar triagem e depois evoluir
   const triarMutation = useMutation({
     mutationFn: async () => {
       if (!demandaOriginal) return
-      
+
       // Primeiro salva a triagem (se onTriar estiver disponível)
       if (onTriar) {
         const payload: TriarDemandaPayload = {
@@ -285,10 +230,10 @@ export function ModalDetalheTriagem({
         }
         await onTriar(demandaOriginal.id, payload)
       }
-      
+
       // Aguardar um pouco para garantir que a triagem foi salva
-      await new Promise(resolve => setTimeout(resolve, 200))
-      
+      await new Promise((resolve) => setTimeout(resolve, 200))
+
       // Depois evolui para Discovery
       return evoluirParaDiscovery(demandaOriginal.id)
     },
@@ -296,11 +241,11 @@ export function ModalDetalheTriagem({
       // Invalidar queries para atualizar a lista
       await queryClient.invalidateQueries({ queryKey: ['triagem'] })
       await queryClient.invalidateQueries({ queryKey: ['demandas'] })
-      
+
       toast.success('Demanda enviada para Discovery', {
         description: data?.discoveryId ? `ID Discovery: ${data.discoveryId}` : undefined,
       })
-      
+
       // Fechar modal após um pequeno delay para garantir que o toast apareça
       setTimeout(() => {
         onOpenChange(false)
@@ -309,9 +254,10 @@ export function ModalDetalheTriagem({
     onError: (error: any) => {
       console.error('Erro ao enviar para Discovery:', error)
       const errorData = error?.response?.data || error?.data
-      const errorMessage = errorData?.message || error?.message || 'Erro ao enviar demanda para Discovery'
+      const errorMessage =
+        errorData?.message || error?.message || 'Erro ao enviar demanda para Discovery'
       const errorDetails = errorData?.details
-      
+
       if (errorDetails && Array.isArray(errorDetails)) {
         const issues = errorDetails.map((d: any) => `• ${d.issue || d.message || ''}`).join('\n')
         toast.error('Triagem incompleta', {
@@ -364,28 +310,27 @@ export function ModalDetalheTriagem({
     }
   }, [open])
 
-  const handleChecklistChange = React.useCallback((updates: Array<{ itemId: string; completed: boolean }>) => {
-    setCheckedItems(prev => {
-      const next = new Set(prev)
-      updates.forEach(u => {
-        if (u.completed) next.add(u.itemId)
-        else next.delete(u.itemId)
+  const handleChecklistChange = React.useCallback(
+    (updates: Array<{ itemId: string; completed: boolean }>) => {
+      setCheckedItems((prev) => {
+        const next = new Set(prev)
+        updates.forEach((u) => {
+          if (u.completed) next.add(u.itemId)
+          else next.delete(u.itemId)
+        })
+        return next
       })
-      return next
-    })
-  }, [])
+    },
+    [],
+  )
 
   if (!demandaOriginal || !demandaParaChecklist) return null
 
   // Verificar se a demanda já está em discovery (após garantir que demandaOriginal existe)
   const jaEstaEmDiscovery = demandaOriginal.triagem.status === 'PRONTO_DISCOVERY'
-  
-  const podeEnviarDiscovery = 
-    !jaEstaEmDiscovery && 
-    checklistValid && 
-    impacto && 
-    urgencia && 
-    complexidade
+
+  const podeEnviarDiscovery =
+    !jaEstaEmDiscovery && checklistValid && impacto && urgencia && complexidade
 
   const Icon = tipoIcons[demandaOriginal.tipo as keyof typeof tipoIcons] || Package2
   const demandaImpactoNormalized = normalizeValue(demandaOriginal.triagem.impacto)
@@ -728,10 +673,10 @@ export function ModalDetalheTriagem({
                 title={jaEstaEmDiscovery ? 'Esta demanda já foi enviada para Discovery' : undefined}
               >
                 <Send className="mr-2 h-4 w-4" />
-                {triarMutation.isPending 
-                  ? 'Enviando...' 
-                  : jaEstaEmDiscovery 
-                    ? 'Já em Discovery' 
+                {triarMutation.isPending
+                  ? 'Enviando...'
+                  : jaEstaEmDiscovery
+                    ? 'Já em Discovery'
                     : 'Enviar para Discovery'}
               </Button>
             </div>
