@@ -7,6 +7,7 @@ const moduleNameMapper = {
   '^@infra/(.*)$': '<rootDir>/src/infrastructure/$1',
   '^@interfaces/(.*)$': '<rootDir>/src/interfaces/$1',
   '^@config/(.*)$': '<rootDir>/src/config/$1',
+  '^@modules/(.*)$': '<rootDir>/src/modules/$1',
 };
 
 const transform: Config['transform'] = {
@@ -86,6 +87,17 @@ const config: Config = {
       setupFilesAfterEnv,
       testPathIgnorePatterns: ['<rootDir>/dist/', '/node_modules/'],
     },
+    {
+      displayName: 'integration',
+      preset: 'ts-jest',
+      testEnvironment: 'node',
+      rootDir: '.',
+      testMatch: ['<rootDir>/test/integration/**/*.integration.spec.ts'],
+      moduleNameMapper,
+      transform,
+      setupFilesAfterEnv: ['<rootDir>/test/integration/setup.ts'],
+      testPathIgnorePatterns: ['<rootDir>/dist/', '/node_modules/'],
+    } as Config,
   ],
 };
 

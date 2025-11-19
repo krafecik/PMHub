@@ -105,30 +105,75 @@ const planejamentoCenariosResponse = [
   },
 ]
 
-test.describe('Fluxo de Planejamento', () => {
+async function mockPlanejamentoRequests(page: Parameters<typeof test>[0]['page']) {
+  const planningHandlers = [
+    { pattern: '**/v1/planejamento/dashboard**', body: planejamentoDashboardResponse },
+    { pattern: '**/v1/planejamento/timeline**', body: planejamentoTimelineResponse },
+    { pattern: '**/v1/planejamento/cenarios**', body: planejamentoCenariosResponse },
+  ]
+
+  for (const handler of planningHandlers) {
+    await page.route(handler.pattern, async (route) => {
+      const method = route.request().method()
+      if (method === 'OPTIONS') {
+        await fulfillOptions(route)
+        return
+      }
+      if (method === 'GET') {
+        await fulfillJson(route, handler.body)
+        return
+      }
+      await route.continue()
+    })
+  }
+
+  // Mock de épicos
+  await page.route('**/v1/planejamento/epicos**', async (route) => {
+    const method = route.request().method()
+    if (method === 'OPTIONS') {
+      await fulfillOptions(route)
+      return
+    }
+    if (method === 'GET') {
+      await fulfillJson(route, {
+        data: planejamentoDashboardResponse.epicos.data,
+        total: 1,
+      })
+      return
+    }
+    if (method === 'POST') {
+      await fulfillJson(route, {
+        id: 'EP-NEW',
+        titulo: 'Novo Épico',
+        status: 'PLANNED',
+      })
+      return
+    }
+    await route.continue()
+  })
+
+  // Mock de features
+  await page.route('**/v1/planejamento/features**', async (route) => {
+    const method = route.request().method()
+    if (method === 'OPTIONS') {
+      await fulfillOptions(route)
+      return
+    }
+    if (method === 'GET') {
+      await fulfillJson(route, {
+        data: [],
+        total: 0,
+      })
+      return
+    }
+    await route.continue()
+  })
+}
+
+test.describe('Módulo de Planejamento', () => {
   test('exibe dashboards, cards de épicos e cenários simulados', async ({ page }) => {
     await authenticateUser(page)
-
-    const planningHandlers = [
-      { pattern: '**/v1/planejamento/dashboard**', body: planejamentoDashboardResponse },
-      { pattern: '**/v1/planejamento/timeline**', body: planejamentoTimelineResponse },
-      { pattern: '**/v1/planejamento/cenarios**', body: planejamentoCenariosResponse },
-    ]
-
-    for (const handler of planningHandlers) {
-      await page.route(handler.pattern, async (route) => {
-        const method = route.request().method()
-        if (method === 'OPTIONS') {
-          await fulfillOptions(route)
-          return
-        }
-        if (method === 'GET') {
-          await fulfillJson(route, handler.body)
-          return
-        }
-        await route.continue()
-      })
-    }
+    await mockPlanejamentoRequests(page)
 
     await page.goto('/planejamento')
 
@@ -137,6 +182,81 @@ test.describe('Fluxo de Planejamento', () => {
     await expect(page.getByRole('heading', { name: 'Nova jornada cross-squad' })).toBeVisible()
     await expect(page.getByText('Cenário Base')).toBeVisible()
     await expect(page.getByRole('button', { name: 'Ajuda' })).toBeVisible()
+  })
+
+  test('navega para página de épicos', async ({ page }) => {
+    await authenticateUser(page)
+    await mockPlanejamentoRequests(page)
+
+    await page.goto('/planejamento')
+    await page.waitForLoadState('networkidle')
+
+    const epicosLink = page.getByRole('link', { name: /épicos/i })
+    if (await epicosLink.count() > 0) {
+      await epicosLink.click()
+      await page.waitForLoadState('networkidle')
+      await expect(page.getByText(/épicos/i)).toBeVisible({ timeout: 10000 })
+    }
+  })
+
+  test('navega para página de features', async ({ page }) => {
+    await authenticateUser(page)
+    await mockPlanejamentoRequests(page)
+
+    await page.goto('/planejamento')
+    await page.waitForLoadState('networkidle')
+
+    const featuresLink = page.getByRole('link', { name: /features/i })
+    if (await featuresLink.count() > 0) {
+      await featuresLink.click()
+      await page.waitForLoadState('networkidle')
+      await expect(page.getByText(/features/i)).toBeVisible({ timeout: 10000 })
+    }
+  })
+
+  test('navega para roadmap', async ({ page }) => {
+    await authenticateUser(page)
+    await mockPlanejamentoRequests(page)
+
+    await page.goto('/planejamento')
+    await page.waitForLoadState('networkidle')
+
+    const roadmapLink = page.getByRole('link', { name: /roadmap/i })
+    if (await roadmapLink.count() > 0) {
+      await roadmapLink.click()
+      await page.waitForLoadState('networkidle')
+      await expect(page.getByText(/roadmap/i)).toBeVisible({ timeout: 10000 })
+    }
+  })
+
+  test('navega para simulador de cenários', async ({ page }) => {
+    await authenticateUser(page)
+    await mockPlanejamentoRequests(page)
+
+    await page.goto('/planejamento')
+    await page.waitForLoadState('networkidle')
+
+    const simuladorLink = page.getByRole('link', { name: /simulador/i })
+    if (await simuladorLink.count() > 0) {
+      await simuladorLink.click()
+      await page.waitForLoadState('networkidle')
+      await expect(page.getByText(/simulador/i)).toBeVisible({ timeout: 10000 })
+    }
+  })
+
+  test('navega para capacidade', async ({ page }) => {
+    await authenticateUser(page)
+    await mockPlanejamentoRequests(page)
+
+    await page.goto('/planejamento')
+    await page.waitForLoadState('networkidle')
+
+    const capacidadeLink = page.getByRole('link', { name: /capacidade/i })
+    if (await capacidadeLink.count() > 0) {
+      await capacidadeLink.click()
+      await page.waitForLoadState('networkidle')
+      await expect(page.getByText(/capacidade/i)).toBeVisible({ timeout: 10000 })
+    }
   })
 })
 

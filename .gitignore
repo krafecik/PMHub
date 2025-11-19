@@ -32,3 +32,9 @@ backend/prisma/*.db
 # Docker
 docker-data/
 
+# Test results
+test-results/
+*.bak.sql
+
+# Playwright
+.playwright/

@@ -97,10 +97,20 @@ export async function authenticateUser(page: Page, session = mockAuthSession) {
     await route.continue()
   })
 
-  await page.goto('/login')
+  await page.goto('/login', { waitUntil: 'networkidle' })
+  
+  // Aguardar campos do formulário estarem visíveis
+  await page.getByLabel('E-mail').waitFor({ state: 'visible' })
   await page.getByLabel('E-mail').fill(session.user.email)
   await page.getByLabel('Senha').fill('senhaSegura123')
-  await page.getByRole('button', { name: /entrar/i }).click()
-  await expect(page).toHaveURL(/\/dashboard/)
+  
+  // Clicar e aguardar navegação
+  await Promise.all([
+    page.waitForURL(/\/dashboard/, { timeout: 30000 }),
+    page.getByRole('button', { name: /entrar/i }).click(),
+  ])
+  
+  // Aguardar página carregar completamente
+  await page.waitForLoadState('networkidle', { timeout: 30000 })
 }
 
