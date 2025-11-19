@@ -1,5 +1,5 @@
 /**
- * Sistema de sombras do CPOPM Hub
+ * Sistema de sombras do PM Hub
  * Sombras sutis e modernas para criar profundidade
  */
 

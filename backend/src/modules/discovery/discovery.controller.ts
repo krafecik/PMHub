@@ -12,4 +12,3 @@ export class DiscoveryController {
     return this.service.getStatus();
   }
 }
-

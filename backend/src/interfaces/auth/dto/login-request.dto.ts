@@ -1,18 +1,11 @@
 import { AuthSession } from '@application/auth/auth.service';
 import { TenantRole } from '@prisma/client';
 import { Expose, Type } from 'class-transformer';
-import {
-  IsEmail,
-  IsEnum,
-  IsOptional,
-  IsString,
-  MinLength,
-  ValidateIf
-} from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, IsString, MinLength, ValidateIf } from 'class-validator';
 
 export enum AuthProviderRequest {
   AZURE_AD = 'azuread',
-  LOCAL = 'local'
+  LOCAL = 'local',
 }
 
 export class LoginRequestDto {
@@ -88,10 +81,10 @@ export class AuthSessionResponseDto {
         email: session.user.email,
         nome: session.user.nome,
         foto_url: session.user.foto_url ?? null,
-        tenants: session.user.tenants
+        tenants: session.user.tenants,
       },
       tokens: session.tokens,
-      defaultTenantId: session.defaultTenantId
+      defaultTenantId: session.defaultTenantId,
     };
   }
 }
@@ -120,4 +113,3 @@ export class AuthCallbackQueryDto {
   @IsString()
   state!: string;
 }
-

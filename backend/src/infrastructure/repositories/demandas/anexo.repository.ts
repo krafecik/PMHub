@@ -1,19 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@infra/database';
-import {
-  IAnexoRepository,
-  AnexoData,
-  Anexo,
-} from './anexo.repository.interface';
+import { IAnexoRepository, AnexoData, Anexo } from './anexo.repository.interface';
 
 @Injectable()
 export class AnexoRepository implements IAnexoRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async save(data: AnexoData): Promise<string> {
+    // Buscar tenant_id da demanda
+    const demanda = await this.prisma.demanda.findUnique({
+      where: { id: BigInt(data.demandaId) },
+      select: { tenant_id: true },
+    });
+
+    if (!demanda) {
+      throw new Error(`Demanda ${data.demandaId} não encontrada`);
+    }
+
     const created = await this.prisma.anexo.create({
       data: {
         demanda_id: BigInt(data.demandaId),
+        tenant_id: demanda.tenant_id,
         arquivo_url: data.arquivoUrl,
         nome: data.nome,
         tipo_mime: data.tipoMime,

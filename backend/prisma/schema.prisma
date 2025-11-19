@@ -8,40 +8,97 @@ datasource db {
 }
 
 model Tenant {
-  id         BigInt        @id @default(autoincrement())
-  nome       String
-  status     TenantStatus  @default(ACTIVE)
-  users      UserTenant[]
-  produtos   Produto[]
-  demandas   Demanda[]
-  tags       Tag[]
-  created_at DateTime      @default(now())
-  updated_at DateTime      @updatedAt
-  deleted_at DateTime?
+  id                        BigInt                         @id @default(autoincrement())
+  nome                      String
+  status                    TenantStatus                   @default(ACTIVE)
+  users                     UserTenant[]
+  produtos                  Produto[]
+  documentos                Documento[]
+  demandas                  Demanda[]
+  tags                      Tag[]
+  demanda_tags              DemandaTag[]
+  anexos                    Anexo[]
+  comentarios               Comentario[]
+  triagens                  TriagemDemanda[]
+  solicitacoes_info         SolicitacaoInfo[]
+  duplicatas_demandas       DuplicatasDemanda[]
+  discoveries               Discovery[]
+  discovery_identificacoes  DiscoveryIdentificacao[]
+  discovery_publicos        DiscoveryPublico[]
+  hipoteses                 Hipotese[]
+  pesquisas                 Pesquisa[]
+  entrevistas               Entrevista[]
+  evidencias                Evidencia[]
+  insights                  Insight[]
+  experimentos              Experimento[]
+  decisoes_discovery        DecisaoDiscovery[]
+  regras_automacao          RegrasAutomacaoTriagem[]
+  user_invites              UserInvite[]
+  planejamento_epicos       PlanejamentoEpico[]
+  planejamento_features     PlanejamentoFeature[]
+  planejamento_dependencias PlanejamentoDependencia[]
+  planejamento_squads       PlanejamentoSquad[]
+  planning_cycles           PlanningCycle[]
+  planejamento_capacity     PlanejamentoCapacitySnapshot[]
+  planejamento_commitments  PlanejamentoCommitment[]
+  planejamento_cenarios     PlanejamentoCenario[]
+  catalog_categories        CatalogCategory[]
+  catalog_items             CatalogItem[]
+  decision_logs             PlanejamentoDecisionLog[]
+  created_at                DateTime                       @default(now())
+  updated_at                DateTime                       @updatedAt
+  deleted_at                DateTime?
 }
 
 model User {
-  id             BigInt        @id @default(autoincrement())
-  provider       AuthProvider
-  subject_id     String?
-  email          String        @unique
-  nome           String
-  foto_url       String?
-  status         UserStatus    @default(ACTIVE)
-  password_hash  String?
-  token_version  Int           @default(0)
-  tenants        UserTenant[]
-  demandas_criadas       Demanda[]     @relation("DemandaCriador")
-  demandas_responsavel   Demanda[]     @relation("DemandaResponsavel")
-  anexos         Anexo[]
-  comentarios    Comentario[]
-  created_at     DateTime      @default(now())
-  updated_at     DateTime      @updatedAt
-  deleted_at     DateTime?
+  id                      BigInt                    @id @default(autoincrement())
+  provider                AuthProvider
+  subject_id              String?
+  email                   String                    @unique
+  nome                    String
+  foto_url                String?
+  status                  UserStatus                @default(ACTIVE)
+  password_hash           String?
+  token_version           Int                       @default(0)
+  email_verified_at       DateTime?
+  last_login_at           DateTime?
+  last_password_change_at DateTime?
+  failed_attempts         Int                       @default(0)
+  locked_until            DateTime?
+  tipo_usuario_id         BigInt?
+  cargo_usuario_id        BigInt?
+  tenants                 UserTenant[]
+  demandas_criadas        Demanda[]                 @relation("DemandaCriador")
+  demandas_responsavel    Demanda[]                 @relation("DemandaResponsavel")
+  anexos                  Anexo[]
+  comentarios             Comentario[]
+  triagens                TriagemDemanda[]
+  solicitacoes_info       SolicitacaoInfo[]
+  discoveries_criadas     Discovery[]               @relation("DiscoveryCriador")
+  discoveries_responsavel Discovery[]               @relation("DiscoveryResponsavel")
+  decisoes_discovery      DecisaoDiscovery[]
+  epicos_owner            PlanejamentoEpico[]       @relation("EpicoOwner")
+  epicos_sponsor          PlanejamentoEpico[]       @relation("EpicoSponsor")
+  features_revisadas      PlanejamentoFeature[]     @relation("FeatureRevisor")
+  decision_logs           PlanejamentoDecisionLog[]
+  invites_enviados        UserInvite[]              @relation("UserInviteInviter")
+  password_reset_tokens   PasswordResetToken[]
+  documentos_pm           Documento[]               @relation("DocumentoPm")
+  documentoComentarios    DocumentoComentario[]     @relation("DocumentoComentarioAutor")
+  documentoAprovacoes     DocumentoAprovacao[]      @relation("DocumentoAprovador")
+  regras_automacao_criadas RegrasAutomacaoTriagem[] @relation("RegraAutomacaoCriador")
+  tipo_usuario            CatalogItem?              @relation("UserTipo", fields: [tipo_usuario_id], references: [id])
+  cargo_usuario           CatalogItem?              @relation("UserCargo", fields: [cargo_usuario_id], references: [id])
+  created_at              DateTime                  @default(now())
+  updated_at              DateTime                  @updatedAt
+  deleted_at              DateTime?
+
+  @@index([tipo_usuario_id])
+  @@index([cargo_usuario_id])
 }
 
 model UserTenant {
-  id        BigInt @id @default(autoincrement())
+  id        BigInt     @id @default(autoincrement())
   user_id   BigInt
   tenant_id BigInt
   role      TenantRole
@@ -57,108 +114,360 @@ model UserTenant {
   @@index([user_id])
 }
 
-model Produto {
+model UserInvite {
+  id            BigInt     @id @default(autoincrement())
+  token_hash    String     @unique
+  email         String
+  nome          String?
+  mensagem      String?
+  tenant_id     BigInt
+  role          TenantRole
+  invited_by_id BigInt
+  invited_at    DateTime   @default(now())
+  expires_at    DateTime
+  accepted_at   DateTime?
+  revoked_at    DateTime?
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+
+  tenant     Tenant @relation(fields: [tenant_id], references: [id])
+  convidante User   @relation("UserInviteInviter", fields: [invited_by_id], references: [id])
+
+  @@index([tenant_id])
+  @@index([invited_by_id])
+  @@index([expires_at])
+}
+
+model PasswordResetToken {
   id         BigInt    @id @default(autoincrement())
+  token_hash String    @unique
+  user_id    BigInt
+  expires_at DateTime
+  used_at    DateTime?
+  created_at DateTime  @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
+
+  @@index([user_id])
+  @@index([expires_at])
+}
+
+model Produto {
+  id         BigInt        @id @default(autoincrement())
   tenant_id  BigInt
   nome       String
   descricao  String?
   status     ProdutoStatus @default(ACTIVE)
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
+  created_at DateTime      @default(now())
+  updated_at DateTime      @updatedAt
   deleted_at DateTime?
 
-  tenant Tenant @relation(fields: [tenant_id], references: [id])
-  demandas Demanda[]
+  tenant                   Tenant                   @relation(fields: [tenant_id], references: [id])
+  demandas                 Demanda[]
+  discoveries              Discovery[]
+  planejamento_epicos      PlanejamentoEpico[]
+  planning_cycles          PlanningCycle[]
+  planejamento_commitments PlanejamentoCommitment[]
+  catalog_items            CatalogItem[]
+  planejamento_squads      PlanejamentoSquad[]
+  documentos               Documento[]
 
   @@index([tenant_id])
 }
 
 model Demanda {
-  id              BigInt        @id @default(autoincrement())
-  tenant_id       BigInt
-  titulo          String
-  descricao       String?
-  tipo            TipoDemanda
-  produto_id      BigInt
-  origem          OrigemDemanda
-  origem_detalhe  String?
-  responsavel_id  BigInt?
-  prioridade      Prioridade    @default(MEDIA)
-  status          StatusDemanda @default(NOVO)
-  criado_por_id   BigInt
-  created_at      DateTime      @default(now())
-  updated_at      DateTime      @updatedAt
-  deleted_at      DateTime?
+  id                  BigInt    @id @default(autoincrement())
+  tenant_id           BigInt
+  titulo              String
+  descricao           String?
+  tipo_id             BigInt
+  produto_id          BigInt
+  origem_id           BigInt
+  origem_detalhe      String?
+  responsavel_id      BigInt?
+  prioridade_id       BigInt
+  status_id           BigInt
+  criado_por_id       BigInt
+  motivo_cancelamento String?
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  deleted_at          DateTime?
 
-  tenant       Tenant        @relation(fields: [tenant_id], references: [id])
-  produto      Produto       @relation(fields: [produto_id], references: [id])
-  responsavel  User?         @relation("DemandaResponsavel", fields: [responsavel_id], references: [id])
-  criado_por   User          @relation("DemandaCriador", fields: [criado_por_id], references: [id])
-  tags         DemandaTag[]
-  anexos       Anexo[]
-  comentarios  Comentario[]
+  tenant      Tenant          @relation(fields: [tenant_id], references: [id])
+  produto     Produto         @relation(fields: [produto_id], references: [id])
+  responsavel User?           @relation("DemandaResponsavel", fields: [responsavel_id], references: [id])
+  criado_por  User            @relation("DemandaCriador", fields: [criado_por_id], references: [id])
+  tags        DemandaTag[]
+  anexos      Anexo[]
+  comentarios Comentario[]
+  triagem     TriagemDemanda?
+  discovery   Discovery?
+
+  tipo       CatalogItem @relation("DemandaTipo", fields: [tipo_id], references: [id])
+  origem     CatalogItem @relation("DemandaOrigem", fields: [origem_id], references: [id])
+  prioridade CatalogItem @relation("DemandaPrioridade", fields: [prioridade_id], references: [id])
+  status     CatalogItem @relation("DemandaStatus", fields: [status_id], references: [id])
 
   @@index([tenant_id])
   @@index([produto_id])
-  @@index([status])
+  @@index([status_id])
   @@index([created_at])
   @@index([responsavel_id])
+  @@index([tipo_id])
+  @@index([origem_id])
+  @@index([prioridade_id])
 }
 
 model Tag {
-  id         BigInt       @id @default(autoincrement())
+  id         BigInt   @id @default(autoincrement())
   tenant_id  BigInt
   nome       String
-  created_at DateTime     @default(now())
+  created_at DateTime @default(now())
 
-  tenant    Tenant        @relation(fields: [tenant_id], references: [id])
-  demandas  DemandaTag[]
+  tenant   Tenant       @relation(fields: [tenant_id], references: [id])
+  demandas DemandaTag[]
+  documentos DocumentoTag[]
 
   @@unique([tenant_id, nome])
   @@index([tenant_id])
 }
 
+model CatalogCategory {
+  id             BigInt    @id @default(autoincrement())
+  tenant_id      BigInt
+  slug           String
+  nome           String
+  descricao      String?
+  escopo_produto Boolean   @default(false)
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+  deleted_at     DateTime?
+
+  tenant Tenant        @relation(fields: [tenant_id], references: [id])
+  itens  CatalogItem[]
+
+  @@unique([tenant_id, slug])
+  @@index([tenant_id])
+}
+
+model CatalogItem {
+  id          BigInt    @id @default(autoincrement())
+  tenant_id   BigInt
+  category_id BigInt
+  produto_id  BigInt?
+  slug        String
+  label       String
+  descricao   String?
+  ordem       Int       @default(0)
+  ativo       Boolean   @default(true)
+  metadados   Json?     @default("{}")
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  tenant    Tenant          @relation(fields: [tenant_id], references: [id])
+  categoria CatalogCategory @relation(fields: [category_id], references: [id])
+  produto   Produto?        @relation(fields: [produto_id], references: [id])
+
+  demandas_tipo                         Demanda[]                @relation("DemandaTipo")
+  demandas_origem                       Demanda[]                @relation("DemandaOrigem")
+  demandas_prioridade                   Demanda[]                @relation("DemandaPrioridade")
+  demandas_status                       Demanda[]                @relation("DemandaStatus")
+  triagens_status                       TriagemDemanda[]         @relation("TriagemStatus")
+  triagens_impacto                      TriagemDemanda[]         @relation("TriagemImpacto")
+  triagens_urgencia                     TriagemDemanda[]         @relation("TriagemUrgencia")
+  triagens_complexidade                 TriagemDemanda[]         @relation("TriagemComplexidade")
+  usuarios_tipo                         User[]                   @relation("UserTipo")
+  usuarios_cargo                        User[]                   @relation("UserCargo")
+  anexos_tipo                           Anexo[]                  @relation("AnexoTipo")
+  discoveries_status                    Discovery[]              @relation("DiscoveryStatus")
+  discoveries_severidade                Discovery[]              @relation("DiscoverySeveridade")
+  discoveries_parciais                  Discovery[]              @relation("DiscoveryDecisaoParcial")
+  hipoteses_status                      Hipotese[]               @relation("HipoteseStatus")
+  hipoteses_impacto                     Hipotese[]               @relation("HipoteseImpacto")
+  hipoteses_prioridade                  Hipotese[]               @relation("HipotesePrioridade")
+  pesquisas_metodo                      Pesquisa[]               @relation("PesquisaMetodo")
+  pesquisas_status                      Pesquisa[]               @relation("PesquisaStatus")
+  evidencias_tipo                       Evidencia[]              @relation("EvidenciaTipo")
+  insights_status                       Insight[]                @relation("InsightStatus")
+  insights_impacto                      Insight[]                @relation("InsightImpacto")
+  insights_confianca                    Insight[]                @relation("InsightConfianca")
+  entrevistas_persona                   Entrevista[]             @relation("EntrevistaPersona")
+  experimentos_tipo                     Experimento[]            @relation("ExperimentoTipo")
+  experimentos_status                   Experimento[]            @relation("ExperimentoStatus")
+  experimentos_metricas                 Experimento[]            @relation("ExperimentoMetrica")
+  decisoes_status                       DecisaoDiscovery[]       @relation("DecisaoStatus")
+  planejamento_squads_status            PlanejamentoSquad[]      @relation("PlanejamentoSquadStatus")
+  planejamento_cenarios_status          PlanejamentoCenario[]    @relation("PlanejamentoCenarioStatus")
+  planning_cycles_status                PlanningCycle[]          @relation("PlanningCycleStatus")
+  planejamento_commitments_committed    PlanejamentoCommitment[] @relation("CommitmentCommittedTier")
+  planejamento_commitments_targeted     PlanejamentoCommitment[] @relation("CommitmentTargetedTier")
+  planejamento_commitments_aspirational PlanejamentoCommitment[] @relation("CommitmentAspirationalTier")
+
+  discovery_identificacoes DiscoveryIdentificacao[]
+  discovery_publicos       DiscoveryPublico[]
+
+  @@unique([tenant_id, category_id, slug])
+  @@index([tenant_id])
+  @@index([category_id])
+  @@index([produto_id])
+}
+
 model DemandaTag {
   demanda_id BigInt
   tag_id     BigInt
+  tenant_id  BigInt
   created_at DateTime @default(now())
 
   demanda Demanda @relation(fields: [demanda_id], references: [id])
   tag     Tag     @relation(fields: [tag_id], references: [id])
+  tenant  Tenant  @relation(fields: [tenant_id], references: [id])
 
   @@id([demanda_id, tag_id])
   @@index([demanda_id])
   @@index([tag_id])
+  @@index([tenant_id])
 }
 
 model Anexo {
-  id          BigInt   @id @default(autoincrement())
-  demanda_id  BigInt
-  arquivo_url String
-  nome        String
-  tipo_mime   String
-  tamanho     BigInt
+  id            BigInt   @id @default(autoincrement())
+  demanda_id    BigInt
+  tenant_id     BigInt
+  arquivo_url   String
+  nome          String
+  tipo_mime     String
+  tamanho       BigInt
   criado_por_id BigInt
-  created_at  DateTime @default(now())
+  tipo_id       BigInt?
+  created_at    DateTime @default(now())
 
-  demanda    Demanda @relation(fields: [demanda_id], references: [id])
-  criado_por User    @relation(fields: [criado_por_id], references: [id])
+  demanda    Demanda      @relation(fields: [demanda_id], references: [id])
+  tenant     Tenant       @relation(fields: [tenant_id], references: [id])
+  criado_por User         @relation(fields: [criado_por_id], references: [id])
+  tipo       CatalogItem? @relation("AnexoTipo", fields: [tipo_id], references: [id])
 
   @@index([demanda_id])
+  @@index([tenant_id])
+  @@index([tipo_id])
 }
 
 model Comentario {
   id         BigInt   @id @default(autoincrement())
   demanda_id BigInt
+  tenant_id  BigInt
   usuario_id BigInt
   texto      String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   demanda Demanda @relation(fields: [demanda_id], references: [id])
+  tenant  Tenant  @relation(fields: [tenant_id], references: [id])
   usuario User    @relation(fields: [usuario_id], references: [id])
 
   @@index([demanda_id])
+  @@index([tenant_id])
+}
+
+model TriagemDemanda {
+  id                BigInt    @id @default(autoincrement())
+  demanda_id        BigInt    @unique
+  tenant_id         BigInt
+  status_triagem_id BigInt
+  impacto_id        BigInt?
+  urgencia_id       BigInt?
+  complexidade_id   BigInt?
+  checklist_json    Json      @default("{}")
+  triado_por_id     BigInt?
+  triado_em         DateTime?
+  revisoes_triagem  Int       @default(0)
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+
+  demanda               Demanda             @relation(fields: [demanda_id], references: [id])
+  tenant                Tenant              @relation(fields: [tenant_id], references: [id])
+  triado_por            User?               @relation(fields: [triado_por_id], references: [id])
+  solicitacoes_info     SolicitacaoInfo[]
+  duplicatas_detectadas DuplicatasDemanda[] @relation("DemandaDuplicada")
+  duplicata_de          DuplicatasDemanda[] @relation("DemandaOriginal")
+
+  status       CatalogItem  @relation("TriagemStatus", fields: [status_triagem_id], references: [id])
+  impacto      CatalogItem? @relation("TriagemImpacto", fields: [impacto_id], references: [id])
+  urgencia     CatalogItem? @relation("TriagemUrgencia", fields: [urgencia_id], references: [id])
+  complexidade CatalogItem? @relation("TriagemComplexidade", fields: [complexidade_id], references: [id])
+
+  @@index([demanda_id])
+  @@index([tenant_id])
+  @@index([status_triagem_id])
+  @@index([triado_por_id])
+  @@index([impacto_id])
+  @@index([urgencia_id])
+  @@index([complexidade_id])
+}
+
+model SolicitacaoInfo {
+  id             BigInt            @id @default(autoincrement())
+  triagem_id     BigInt
+  tenant_id      BigInt
+  solicitante_id BigInt
+  texto          String
+  anexos         Json              @default("[]")
+  prazo          DateTime?
+  status         StatusSolicitacao @default(PENDENTE)
+  respondido_em  DateTime?
+  resposta       String?
+  created_at     DateTime          @default(now())
+  updated_at     DateTime          @updatedAt
+
+  triagem     TriagemDemanda @relation(fields: [triagem_id], references: [id])
+  tenant      Tenant         @relation(fields: [tenant_id], references: [id])
+  solicitante User           @relation(fields: [solicitante_id], references: [id])
+
+  @@index([triagem_id])
+  @@index([tenant_id])
+  @@index([solicitante_id])
+  @@index([status])
+}
+
+model DuplicatasDemanda {
+  id                  BigInt   @id @default(autoincrement())
+  demanda_id          BigInt
+  demanda_original_id BigInt
+  tenant_id           BigInt
+  similaridade        Float
+  created_at          DateTime @default(now())
+
+  demanda          TriagemDemanda @relation("DemandaDuplicada", fields: [demanda_id], references: [id])
+  demanda_original TriagemDemanda @relation("DemandaOriginal", fields: [demanda_original_id], references: [id])
+  tenant           Tenant         @relation(fields: [tenant_id], references: [id])
+
+  @@unique([demanda_id, demanda_original_id])
+  @@index([demanda_id])
+  @@index([demanda_original_id])
+  @@index([tenant_id])
+}
+
+model RegrasAutomacaoTriagem {
+  id            String    @id @default(uuid())
+  id_tenant     BigInt
+  nome          String
+  descricao     String?
+  condicao_json Json
+  acao_json     Json
+  ativo         Boolean   @default(true)
+  ordem         Int       @default(0)
+  criado_por_id BigInt
+  created_at    DateTime  @default(now()) @map("created_at")
+  updated_at    DateTime  @updatedAt @map("updated_at")
+  deleted_at    DateTime?
+
+  tenant     Tenant @relation(fields: [id_tenant], references: [id])
+  criado_por User   @relation("RegraAutomacaoCriador", fields: [criado_por_id], references: [id])
+
+  @@index([id_tenant])
+  @@index([ativo])
+  @@index([ordem])
+  @@index([criado_por_id])
+  @@map("RegrasAutomacaoTriagem")
 }
 
 enum AuthProvider {
@@ -180,6 +489,10 @@ enum TenantStatus {
 enum UserStatus {
   ACTIVE
   INACTIVE
+  INVITED
+  LOCKED
+  DISABLED
+  DRAFT
 }
 
 enum ProdutoStatus {
@@ -187,33 +500,897 @@ enum ProdutoStatus {
   INACTIVE
 }
 
-enum TipoDemanda {
-  IDEIA
-  PROBLEMA
-  OPORTUNIDADE
+enum StatusSolicitacao {
+  PENDENTE
+  RESPONDIDO
+  EXPIRADO
+}
+
+enum PlanejamentoEpicoStatus {
+  PLANNED
+  IN_PROGRESS
+  AT_RISK
+  DONE
+  ON_HOLD
+}
+
+enum PlanejamentoEpicoHealth {
+  GREEN
+  YELLOW
+  RED
+}
+
+enum PlanejamentoFeatureStatus {
+  BACKLOG
+  PLANNED
+  IN_PROGRESS
+  BLOCKED
+  DONE
+  ON_HOLD
+}
+
+enum PlanejamentoDependenciaTipo {
+  HARD
+  SOFT
+  RECURSO
+}
+
+enum PlanejamentoDependenciaRisco {
+  ALTO
+  MEDIO
+  BAIXO
+}
+
+enum DocumentoTipo {
+  PRD
+  BRD
+  RFC
+  SPEC
+  RELEASE_NOTE
+  UX_DOC
+}
+
+enum DocumentoStatus {
+  RASCUNHO
+  REVISAO
+  APROVADO
+  OBSOLETO
+}
+
+enum DocumentoVinculoTipo {
+  DISCOVERY
+  EPICO
+  FEATURE
+  DEMANDA
+  RELEASE
+}
+
+enum RegraNegocioTipo {
+  FISCAL
+  COMERCIAL
+  OPERACIONAL
+  SEGURANCA
   OUTRO
 }
 
-enum OrigemDemanda {
+enum RegraNegocioOrigem {
+  LEGISLACAO
+  REGRA_INTERNA
   CLIENTE
-  SUPORTE
-  DIRETORIA
-  CS
-  VENDAS
-  INTERNO
+  MERCADO
+  OUTRA
 }
 
-enum Prioridade {
-  BAIXA
-  MEDIA
+enum RegraNegocioImpacto {
+  ALTO
+  MEDIO
+  BAIXO
+}
+
+enum AprovacaoTipo {
+  NEGOCIO
+  TECNICA
+  UX
+  COMPLIANCE
+}
+
+enum AprovacaoStatus {
+  PENDENTE
+  APROVADO
+  REPROVADO
+}
+
+enum DocumentoRiscoProbabilidade {
   ALTA
-  CRITICA
+  MEDIA
+  BAIXA
 }
 
-enum StatusDemanda {
-  NOVO
-  RASCUNHO
-  TRIAGEM
-  ARQUIVADO
+enum DocumentoRiscoImpacto {
+  ALTO
+  MEDIO
+  BAIXO
 }
 
+// Discovery Module Models
+model Discovery {
+  id                 BigInt  @id @default(autoincrement())
+  id_tenant          BigInt
+  id_demanda         BigInt  @unique
+  titulo             String
+  descricao          String  @db.Text
+  contexto           String? @db.Text
+  status_id          BigInt
+  severidade_id      BigInt
+  decisao_parcial_id BigInt?
+  criado_por_id      BigInt
+  responsavel_id     BigInt
+  produto_id         BigInt
+  evolucao_log       Json?
+
+  tenant      Tenant  @relation(fields: [id_tenant], references: [id])
+  demanda     Demanda @relation(fields: [id_demanda], references: [id])
+  criado_por  User    @relation("DiscoveryCriador", fields: [criado_por_id], references: [id])
+  responsavel User    @relation("DiscoveryResponsavel", fields: [responsavel_id], references: [id])
+  produto     Produto @relation(fields: [produto_id], references: [id])
+
+  status          CatalogItem              @relation("DiscoveryStatus", fields: [status_id], references: [id])
+  severidade      CatalogItem              @relation("DiscoverySeveridade", fields: [severidade_id], references: [id])
+  decisao_parcial CatalogItem?             @relation("DiscoveryDecisaoParcial", fields: [decisao_parcial_id], references: [id])
+  identificacoes  DiscoveryIdentificacao[]
+  publicos        DiscoveryPublico[]
+
+  hipoteses     Hipotese[]
+  pesquisas     Pesquisa[]
+  evidencias    Evidencia[]
+  insights      Insight[]
+  experimentos  Experimento[]
+  decisao_final DecisaoDiscovery?
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@index([id_tenant])
+  @@index([id_demanda])
+  @@index([status_id])
+  @@index([produto_id])
+  @@index([responsavel_id])
+  @@index([severidade_id])
+  @@index([decisao_parcial_id])
+}
+
+model DiscoveryIdentificacao {
+  id              BigInt   @id @default(autoincrement())
+  discovery_id    BigInt
+  id_tenant       BigInt
+  catalog_item_id BigInt
+  criado_em       DateTime @default(now())
+
+  discovery Discovery   @relation(fields: [discovery_id], references: [id])
+  tenant    Tenant      @relation(fields: [id_tenant], references: [id])
+  catalogo  CatalogItem @relation(fields: [catalog_item_id], references: [id])
+
+  @@unique([discovery_id, catalog_item_id])
+  @@index([id_tenant])
+  @@index([catalog_item_id])
+}
+
+model DiscoveryPublico {
+  id              BigInt   @id @default(autoincrement())
+  discovery_id    BigInt
+  id_tenant       BigInt
+  catalog_item_id BigInt
+  criado_em       DateTime @default(now())
+
+  discovery Discovery   @relation(fields: [discovery_id], references: [id])
+  tenant    Tenant      @relation(fields: [id_tenant], references: [id])
+  catalogo  CatalogItem @relation(fields: [catalog_item_id], references: [id])
+
+  @@unique([discovery_id, catalog_item_id])
+  @@index([id_tenant])
+  @@index([catalog_item_id])
+}
+
+model Hipotese {
+  id            BigInt  @id @default(autoincrement())
+  id_tenant     BigInt
+  id_discovery  BigInt
+  titulo        String
+  descricao     String  @db.Text
+  como_validar  String  @db.Text
+  metrica_alvo  String?
+  impacto_id    BigInt
+  prioridade_id BigInt
+  status_id     BigInt
+
+  tenant       Tenant        @relation(fields: [id_tenant], references: [id])
+  discovery    Discovery     @relation(fields: [id_discovery], references: [id])
+  evidencias   Evidencia[]
+  experimentos Experimento[]
+
+  impacto    CatalogItem @relation("HipoteseImpacto", fields: [impacto_id], references: [id])
+  prioridade CatalogItem @relation("HipotesePrioridade", fields: [prioridade_id], references: [id])
+  status     CatalogItem @relation("HipoteseStatus", fields: [status_id], references: [id])
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@index([id_tenant])
+  @@index([id_discovery])
+  @@index([status_id])
+  @@index([impacto_id])
+  @@index([prioridade_id])
+}
+
+model Pesquisa {
+  id                       BigInt  @id @default(autoincrement())
+  id_tenant                BigInt
+  id_discovery             BigInt
+  titulo                   String
+  metodo_id                BigInt
+  objetivo                 String  @db.Text
+  roteiro_url              String?
+  status_id                BigInt
+  total_participantes      Int     @default(0)
+  participantes_concluidos Int     @default(0)
+
+  tenant      Tenant       @relation(fields: [id_tenant], references: [id])
+  discovery   Discovery    @relation(fields: [id_discovery], references: [id])
+  entrevistas Entrevista[]
+
+  metodo CatalogItem @relation("PesquisaMetodo", fields: [metodo_id], references: [id])
+  status CatalogItem @relation("PesquisaStatus", fields: [status_id], references: [id])
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@index([id_tenant])
+  @@index([id_discovery])
+  @@index([status_id])
+  @@index([metodo_id])
+}
+
+model Entrevista {
+  id                  BigInt   @id @default(autoincrement())
+  id_tenant           BigInt
+  id_pesquisa         BigInt
+  participante_nome   String
+  participante_perfil String?
+  participante_email  String?
+  persona_id          BigInt?
+  data_hora           DateTime
+  transcricao         String?  @db.Text
+  notas               String?  @db.Text
+  gravacao_url        String?
+  tags                String[]
+  duracao_minutos     Int?
+
+  // Relations
+  tenant   Tenant       @relation(fields: [id_tenant], references: [id])
+  pesquisa Pesquisa     @relation(fields: [id_pesquisa], references: [id])
+  insights Insight[]
+  persona  CatalogItem? @relation("EntrevistaPersona", fields: [persona_id], references: [id])
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@index([id_tenant])
+  @@index([id_pesquisa])
+  @@index([data_hora])
+  @@index([persona_id])
+}
+
+model Evidencia {
+  id           BigInt   @id @default(autoincrement())
+  id_tenant    BigInt
+  id_discovery BigInt
+  id_hipotese  BigInt?
+  tipo_id      BigInt
+  titulo       String
+  descricao    String   @db.Text
+  arquivo_url  String?
+  tags         String[]
+
+  tenant    Tenant    @relation(fields: [id_tenant], references: [id])
+  discovery Discovery @relation(fields: [id_discovery], references: [id])
+  hipotese  Hipotese? @relation(fields: [id_hipotese], references: [id])
+
+  tipo CatalogItem @relation("EvidenciaTipo", fields: [tipo_id], references: [id])
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@index([id_tenant])
+  @@index([id_discovery])
+  @@index([id_hipotese])
+  @@index([tipo_id])
+}
+
+model Insight {
+  id             BigInt   @id @default(autoincrement())
+  id_tenant      BigInt
+  id_discovery   BigInt
+  id_entrevista  BigInt?
+  descricao      String   @db.Text
+  impacto_id     BigInt
+  confianca_id   BigInt
+  status_id      BigInt
+  tags           String[]
+  evidencias_ids BigInt[]
+
+  tenant     Tenant      @relation(fields: [id_tenant], references: [id])
+  discovery  Discovery   @relation(fields: [id_discovery], references: [id])
+  entrevista Entrevista? @relation(fields: [id_entrevista], references: [id])
+
+  impacto   CatalogItem @relation("InsightImpacto", fields: [impacto_id], references: [id])
+  confianca CatalogItem @relation("InsightConfianca", fields: [confianca_id], references: [id])
+  status    CatalogItem @relation("InsightStatus", fields: [status_id], references: [id])
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@index([id_tenant])
+  @@index([id_discovery])
+  @@index([status_id])
+  @@index([impacto_id])
+  @@index([confianca_id])
+}
+
+model Experimento {
+  id                 BigInt  @id @default(autoincrement())
+  id_tenant          BigInt
+  id_discovery       BigInt
+  id_hipotese        BigInt?
+  titulo             String
+  descricao          String  @db.Text
+  tipo_id            BigInt
+  metrica_sucesso    String
+  metrica_sucesso_id BigInt?
+  grupo_controle     Json?
+  grupo_variante     Json?
+  resultados         Json?
+  p_value            Float?
+  status_id          BigInt
+
+  tenant    Tenant    @relation(fields: [id_tenant], references: [id])
+  discovery Discovery @relation(fields: [id_discovery], references: [id])
+  hipotese  Hipotese? @relation(fields: [id_hipotese], references: [id])
+
+  tipo             CatalogItem  @relation("ExperimentoTipo", fields: [tipo_id], references: [id])
+  status           CatalogItem  @relation("ExperimentoStatus", fields: [status_id], references: [id])
+  metrica_catalogo CatalogItem? @relation("ExperimentoMetrica", fields: [metrica_sucesso_id], references: [id])
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@index([id_tenant])
+  @@index([id_discovery])
+  @@index([status_id])
+  @@index([tipo_id])
+  @@index([metrica_sucesso_id])
+}
+
+model DecisaoDiscovery {
+  id               BigInt   @id @default(autoincrement()) @map("id_decisao")
+  id_tenant        BigInt
+  id_discovery     BigInt   @unique
+  status_final_id  BigInt
+  resumo           String   @db.Text
+  aprendizados     String[]
+  recomendacoes    String[]
+  proximos_passos  String[]
+  materiais_anexos Json?
+  decidido_por_id  BigInt
+
+  tenant       Tenant      @relation(fields: [id_tenant], references: [id])
+  discovery    Discovery   @relation(fields: [id_discovery], references: [id])
+  decidido_por User        @relation(fields: [decidido_por_id], references: [id])
+  status_final CatalogItem @relation("DecisaoStatus", fields: [status_final_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([id_tenant])
+  @@index([status_final_id])
+}
+
+model PlanejamentoSquad {
+  id                BigInt    @id @default(autoincrement())
+  id_tenant         BigInt
+  produto_id        BigInt?
+  nome              String
+  slug              String
+  descricao         String?
+  status_id         BigInt
+  cor_token         String?
+  timezone          String?   @default("America/Sao_Paulo")
+  capacidade_padrao Int?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+  deleted_at        DateTime?
+
+  tenant      Tenant                         @relation(fields: [id_tenant], references: [id])
+  produto     Produto?                       @relation(fields: [produto_id], references: [id])
+  status      CatalogItem                    @relation("PlanejamentoSquadStatus", fields: [status_id], references: [id])
+  epicos      PlanejamentoEpico[]
+  features    PlanejamentoFeature[]
+  capacidades PlanejamentoCapacitySnapshot[]
+  documentos  Documento[] @relation("DocumentoSquad")
+
+  @@unique([id_tenant, slug])
+  @@index([id_tenant])
+  @@index([produto_id])
+  @@index([status_id])
+}
+
+model PlanningCycle {
+  id                        BigInt    @id @default(autoincrement())
+  id_tenant                 BigInt
+  produto_id                BigInt?
+  quarter                   String
+  status_id                 BigInt
+  fase_atual                Int       @default(1)
+  checklist                 Json      @default("[]")
+  agenda_url                String?
+  participantes_confirmados Int?
+  participantes_totais      Int?
+  dados_preparacao          Json?
+  iniciado_em               DateTime?
+  finalizado_em             DateTime?
+  created_at                DateTime  @default(now())
+  updated_at                DateTime  @updatedAt
+
+  tenant      Tenant                    @relation(fields: [id_tenant], references: [id])
+  produto     Produto?                  @relation(fields: [produto_id], references: [id])
+  status      CatalogItem               @relation("PlanningCycleStatus", fields: [status_id], references: [id])
+  epicos      PlanejamentoEpico[]
+  commitments PlanejamentoCommitment[]
+  cenarios    PlanejamentoCenario[]
+  logs        PlanejamentoDecisionLog[]
+
+  @@index([id_tenant, quarter])
+  @@index([produto_id])
+  @@index([status_id])
+}
+
+model PlanejamentoEpico {
+  id                BigInt                  @id @default(autoincrement())
+  id_tenant         BigInt
+  produto_id        BigInt
+  planning_cycle_id BigInt?
+  squad_id          BigInt?
+  owner_id          BigInt
+  sponsor_id        BigInt?
+  titulo            String
+  descricao         String?
+  objetivo          String?
+  value_proposition String?
+  criterios_aceite  String?
+  riscos            String?
+  status            PlanejamentoEpicoStatus @default(PLANNED)
+  health            PlanejamentoEpicoHealth @default(GREEN)
+  quarter           String
+  progress_percent  Int                     @default(0)
+  data_inicio       DateTime?
+  data_fim          DateTime?
+  created_at        DateTime                @default(now())
+  updated_at        DateTime                @updatedAt
+  deleted_at        DateTime?
+
+  tenant         Tenant                @relation(fields: [id_tenant], references: [id])
+  produto        Produto               @relation(fields: [produto_id], references: [id])
+  planning_cycle PlanningCycle?        @relation(fields: [planning_cycle_id], references: [id])
+  squad          PlanejamentoSquad?    @relation(fields: [squad_id], references: [id])
+  owner          User                  @relation("EpicoOwner", fields: [owner_id], references: [id])
+  sponsor        User?                 @relation("EpicoSponsor", fields: [sponsor_id], references: [id])
+  features       PlanejamentoFeature[]
+
+  @@index([id_tenant])
+  @@index([produto_id])
+  @@index([quarter])
+  @@index([squad_id])
+}
+
+model PlanejamentoFeature {
+  id                BigInt                    @id @default(autoincrement())
+  id_tenant         BigInt
+  epico_id          BigInt
+  squad_id          BigInt?
+  titulo            String
+  descricao         String?
+  pontos            Int?
+  status            PlanejamentoFeatureStatus @default(PLANNED)
+  riscos            String?
+  criterios_aceite  String?
+  dependencias_json Json?                     @default("[]")
+  revisado_por_id   BigInt?
+  created_at        DateTime                  @default(now())
+  updated_at        DateTime                  @updatedAt
+  deleted_at        DateTime?
+
+  tenant                    Tenant                    @relation(fields: [id_tenant], references: [id])
+  epico                     PlanejamentoEpico         @relation(fields: [epico_id], references: [id])
+  squad                     PlanejamentoSquad?        @relation(fields: [squad_id], references: [id])
+  revisor                   User?                     @relation("FeatureRevisor", fields: [revisado_por_id], references: [id])
+  dependencias_bloqueadas   PlanejamentoDependencia[] @relation("DependenciaBloqueada")
+  dependencias_bloqueadoras PlanejamentoDependencia[] @relation("DependenciaBloqueadora")
+
+  @@index([id_tenant])
+  @@index([epico_id])
+  @@index([squad_id])
+  @@index([status])
+}
+
+model PlanejamentoDependencia {
+  id                     BigInt                       @id @default(autoincrement())
+  id_tenant              BigInt
+  feature_bloqueada_id   BigInt
+  feature_bloqueadora_id BigInt
+  tipo                   PlanejamentoDependenciaTipo
+  risco                  PlanejamentoDependenciaRisco
+  nota                   String?
+  created_at             DateTime                     @default(now())
+  updated_at             DateTime                     @updatedAt
+
+  tenant              Tenant              @relation(fields: [id_tenant], references: [id])
+  feature_bloqueada   PlanejamentoFeature @relation("DependenciaBloqueada", fields: [feature_bloqueada_id], references: [id])
+  feature_bloqueadora PlanejamentoFeature @relation("DependenciaBloqueadora", fields: [feature_bloqueadora_id], references: [id])
+
+  @@unique([feature_bloqueada_id, feature_bloqueadora_id])
+  @@index([id_tenant])
+  @@index([feature_bloqueada_id])
+  @@index([feature_bloqueadora_id])
+}
+
+model PlanejamentoCapacitySnapshot {
+  id                BigInt   @id @default(autoincrement())
+  id_tenant         BigInt
+  squad_id          BigInt
+  quarter           String
+  capacidade_total  Int
+  capacidade_usada  Int
+  buffer_percentual Int      @default(0)
+  ajustes_json      Json?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  tenant Tenant            @relation(fields: [id_tenant], references: [id])
+  squad  PlanejamentoSquad @relation(fields: [squad_id], references: [id])
+
+  @@unique([squad_id, quarter])
+  @@index([id_tenant, quarter])
+}
+
+model PlanejamentoCommitment {
+  id                   BigInt   @id @default(autoincrement())
+  id_tenant            BigInt
+  produto_id           BigInt
+  planning_cycle_id    BigInt?
+  quarter              String
+  committed_item_id    BigInt
+  targeted_item_id     BigInt
+  aspirational_item_id BigInt
+  committed_epicos     Json     @default("[]")
+  targeted_epicos      Json     @default("[]")
+  aspirational_epicos  Json     @default("[]")
+  assinaturas          Json     @default("[]")
+  documento_url        String?
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+
+  tenant            Tenant         @relation(fields: [id_tenant], references: [id])
+  produto           Produto        @relation(fields: [produto_id], references: [id])
+  planning_cycle    PlanningCycle? @relation(fields: [planning_cycle_id], references: [id])
+  committed_item    CatalogItem    @relation("CommitmentCommittedTier", fields: [committed_item_id], references: [id])
+  targeted_item     CatalogItem    @relation("CommitmentTargetedTier", fields: [targeted_item_id], references: [id])
+  aspirational_item CatalogItem    @relation("CommitmentAspirationalTier", fields: [aspirational_item_id], references: [id])
+
+  @@unique([produto_id, quarter])
+  @@index([id_tenant])
+  @@index([committed_item_id])
+  @@index([targeted_item_id])
+  @@index([aspirational_item_id])
+}
+
+model PlanejamentoCenario {
+  id                      BigInt   @id @default(autoincrement())
+  id_tenant               BigInt
+  planning_cycle_id       BigInt?
+  quarter                 String
+  nome                    String
+  descricao               String?
+  status_id               BigInt
+  ajustes_capacidade      Json     @default("[]")
+  incluir_contractors     Boolean  @default(false)
+  considerar_ferias       Boolean  @default(false)
+  buffer_risco_percentual Int      @default(0)
+  resultado               Json?
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+
+  tenant         Tenant         @relation(fields: [id_tenant], references: [id])
+  planning_cycle PlanningCycle? @relation(fields: [planning_cycle_id], references: [id])
+  status         CatalogItem    @relation("PlanejamentoCenarioStatus", fields: [status_id], references: [id])
+
+  @@index([id_tenant, quarter])
+  @@index([status_id])
+}
+
+model PlanejamentoDecisionLog {
+  id                BigInt   @id @default(autoincrement())
+  id_tenant         BigInt
+  planning_cycle_id BigInt?
+  usuario_id        BigInt
+  tipo              String
+  descricao         String
+  payload           Json?
+  created_at        DateTime @default(now())
+
+  tenant         Tenant         @relation(fields: [id_tenant], references: [id])
+  planning_cycle PlanningCycle? @relation(fields: [planning_cycle_id], references: [id])
+  usuario        User           @relation(fields: [usuario_id], references: [id])
+
+  @@index([id_tenant])
+}
+
+model Documento {
+  id                String            @id @default(uuid())
+  id_tenant         BigInt
+  tipo              DocumentoTipo
+  titulo            String
+  resumo            String?
+  status            DocumentoStatus   @default(RASCUNHO)
+  produto_id        BigInt?
+  pm_id             BigInt?
+  squad_id          BigInt?
+  versao_atual_id   String? @unique
+  criado_por_id     BigInt
+  atualizado_por_id BigInt?
+  created_at        DateTime          @default(now())
+  updated_at        DateTime          @updatedAt
+  deleted_at        DateTime?
+
+  tenant       Tenant             @relation(fields: [id_tenant], references: [id])
+  produto      Produto?           @relation(fields: [produto_id], references: [id])
+  pm           User?              @relation("DocumentoPm", fields: [pm_id], references: [id])
+  squad        PlanejamentoSquad? @relation("DocumentoSquad", fields: [squad_id], references: [id])
+  versaoAtual  DocumentoVersao?   @relation("DocumentoVersaoAtual", fields: [versao_atual_id], references: [id])
+  versoes      DocumentoVersao[]
+  vinculos     DocumentoVinculo[]
+  tags         DocumentoTag[]
+  comentarios  DocumentoComentario[]
+  aprovacoes   DocumentoAprovacao[]
+
+  @@index([id_tenant])
+  @@index([tipo])
+  @@index([status])
+  @@index([produto_id])
+  @@index([pm_id])
+  @@index([squad_id])
+}
+
+model DocumentoVersao {
+  id               String                @id @default(uuid())
+  id_tenant        BigInt
+  documento_id     String
+  versao           String
+  conteudo_json    Json?
+  changelog_resumo String?
+  criado_por_id    BigInt
+  created_at       DateTime              @default(now())
+
+  documento Documento @relation(fields: [documento_id], references: [id])
+  documentoVersaoAtual Documento? @relation("DocumentoVersaoAtual")
+  regras    DocumentoRegraNegocio[]
+  requisitosFuncionais DocumentoRequisitoFuncional[]
+  requisitosNaoFuncionais DocumentoRequisitoNaoFuncional[]
+  criteriosAceite DocumentoCriterioAceite[]
+  riscos DocumentoRisco[]
+  anexos DocumentoAnexo[]
+  comentarios DocumentoComentario[]
+  aprovacoes DocumentoAprovacao[]
+
+  @@unique([documento_id, versao])
+  @@index([id_tenant])
+}
+
+model DocumentoVinculo {
+  id             String             @id @default(uuid())
+  id_tenant      BigInt
+  documento_id   String
+  tipo_alvo      DocumentoVinculoTipo
+  id_alvo        String
+  criado_por_id  BigInt
+  created_at     DateTime           @default(now())
+
+  documento Documento @relation(fields: [documento_id], references: [id])
+
+  @@index([id_tenant])
+  @@index([documento_id])
+  @@index([tipo_alvo])
+}
+
+model DocumentoTag {
+  id_documento String
+  id_tag       BigInt
+  id_tenant    BigInt
+  created_at   DateTime @default(now())
+
+  documento Documento @relation(fields: [id_documento], references: [id])
+  tag       Tag       @relation(fields: [id_tag], references: [id])
+
+  @@id([id_documento, id_tag])
+  @@index([id_tenant])
+  @@index([id_tag])
+}
+
+model DocumentoAnexo {
+  id             String   @id @default(uuid())
+  id_tenant      BigInt
+  versao_id      String
+  url            String
+  tipo_mime      String
+  nome_arquivo   String
+  tamanho_bytes  BigInt
+  criado_por_id  BigInt
+  created_at     DateTime @default(now())
+
+  versao DocumentoVersao @relation(fields: [versao_id], references: [id])
+
+  @@index([id_tenant])
+  @@index([versao_id])
+}
+
+model DocumentoRegraNegocio {
+  id             String               @id @default(uuid())
+  id_tenant      BigInt
+  versao_id      String
+  codigo         String
+  titulo         String
+  descricao      String?
+  tipo           RegraNegocioTipo
+  origem         RegraNegocioOrigem
+  impacto        RegraNegocioImpacto
+  modulo         String?
+  criado_por_id  BigInt
+  created_at     DateTime             @default(now())
+  updated_at     DateTime             @updatedAt
+
+  versao DocumentoVersao @relation(fields: [versao_id], references: [id])
+
+  @@index([id_tenant])
+  @@index([versao_id])
+  @@index([codigo])
+  @@index([tipo])
+  @@index([origem])
+  @@index([impacto])
+}
+
+model DocumentoRequisitoFuncional {
+  id             String   @id @default(uuid())
+  id_tenant      BigInt
+  versao_id      String
+  codigo         String
+  descricao      String
+  prioridade     String?
+  criado_por_id  BigInt
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  versao DocumentoVersao @relation(fields: [versao_id], references: [id])
+
+  @@index([id_tenant])
+  @@index([versao_id])
+  @@index([codigo])
+}
+
+model DocumentoRequisitoNaoFuncional {
+  id             String   @id @default(uuid())
+  id_tenant      BigInt
+  versao_id      String
+  categoria      String
+  descricao      String
+  metrica        String?
+  criado_por_id  BigInt
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  versao DocumentoVersao @relation(fields: [versao_id], references: [id])
+
+  @@index([id_tenant])
+  @@index([versao_id])
+  @@index([categoria])
+}
+
+model DocumentoCriterioAceite {
+  id             String   @id @default(uuid())
+  id_tenant      BigInt
+  versao_id      String
+  codigo         String?
+  descricao      String
+  cenario        String?
+  criado_por_id  BigInt
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  versao DocumentoVersao @relation(fields: [versao_id], references: [id])
+
+  @@index([id_tenant])
+  @@index([versao_id])
+  @@index([codigo])
+}
+
+model DocumentoRisco {
+  id             String                   @id @default(uuid())
+  id_tenant      BigInt
+  versao_id      String
+  descricao      String
+  probabilidade  DocumentoRiscoProbabilidade
+  impacto        DocumentoRiscoImpacto
+  mitigacao      String?
+  criado_por_id  BigInt
+  created_at     DateTime                 @default(now())
+  updated_at     DateTime                 @updatedAt
+
+  versao DocumentoVersao @relation(fields: [versao_id], references: [id])
+
+  @@index([id_tenant])
+  @@index([versao_id])
+  @@index([impacto])
+}
+
+model DocumentoComentario {
+  id                 String   @id @default(uuid())
+  id_tenant          BigInt
+  documento_id       String
+  versao_id          String
+  usuario_id         BigInt
+  texto              String
+  tipo               String
+  resolvido          Boolean  @default(false)
+  parent_id          String?
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  documento Documento         @relation(fields: [documento_id], references: [id])
+  versao   DocumentoVersao    @relation(fields: [versao_id], references: [id])
+  usuario  User               @relation("DocumentoComentarioAutor", fields: [usuario_id], references: [id])
+  resposta DocumentoComentario? @relation("DocumentoComentarioThread", fields: [parent_id], references: [id])
+  replies  DocumentoComentario[] @relation("DocumentoComentarioThread")
+
+  @@index([id_tenant])
+  @@index([documento_id])
+  @@index([versao_id])
+  @@index([usuario_id])
+  @@index([tipo])
+}
+
+model DocumentoAprovacao {
+  id             String           @id @default(uuid())
+  id_tenant      BigInt
+  documento_id   String
+  versao_id      String
+  tipo           AprovacaoTipo
+  status         AprovacaoStatus  @default(PENDENTE)
+  aprovado_por_id BigInt?
+  comentario     String?
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @updatedAt
+
+  documento  Documento         @relation(fields: [documento_id], references: [id])
+  versao     DocumentoVersao   @relation(fields: [versao_id], references: [id])
+  aprovadoPor User?            @relation("DocumentoAprovador", fields: [aprovado_por_id], references: [id])
+
+  @@index([id_tenant])
+  @@index([documento_id])
+  @@index([versao_id])
+  @@index([tipo])
+  @@index([status])
+}

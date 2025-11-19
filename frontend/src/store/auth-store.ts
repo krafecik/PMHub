@@ -19,7 +19,7 @@ export type AuthUser = {
 export type AuthTokens = {
   accessToken: string
   expiresIn: number
-  refreshToken: string
+  refreshToken?: string
 }
 
 export type AuthSession = {
@@ -46,14 +46,17 @@ export const useAuthStore = create<AuthState>((set) => ({
   currentTenantId: null,
   tokenExpiresAt: null,
   isInitializing: true,
-  setSession: (session) =>
-    set(() => ({
+  setSession: (session) => {
+    // Salvar accessToken no localStorage para suportar interceptadores legacy
+    localStorage.setItem('accessToken', session.tokens.accessToken)
+    return set(() => ({
       user: session.user,
       accessToken: session.tokens.accessToken,
       currentTenantId: session.defaultTenantId ?? session.user.tenants[0]?.id ?? null,
       tokenExpiresAt: Date.now() + session.tokens.expiresIn * 1000,
       isInitializing: false,
-    })),
+    }))
+  },
   clearSession: () =>
     set(() => ({
       user: null,

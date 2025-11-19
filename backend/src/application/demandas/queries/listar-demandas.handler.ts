@@ -5,7 +5,6 @@ import { Demanda } from '@domain/demandas';
 import {
   IDemandaRepository,
   DEMANDA_REPOSITORY_TOKEN,
-  DemandaPaginatedResult,
 } from '@infra/repositories/demandas/demanda.repository.interface';
 
 export interface DemandaListItem {
@@ -43,25 +42,22 @@ export class ListarDemandasHandler implements IQueryHandler<ListarDemandasQuery>
   ) {}
 
   async execute(query: ListarDemandasQuery): Promise<ListarDemandasResult> {
-    const result = await this.demandaRepository.findAll(
-      query.tenantId,
-      query.filters,
-    );
+    const result = await this.demandaRepository.findAll(query.tenantId, query.filters);
 
     return {
       data: result.data.map((demanda: Demanda) => ({
         id: demanda.id!,
         titulo: demanda.titulo.getValue(),
-        tipo: demanda.tipo.getValue(),
-        tipoLabel: demanda.tipo.getLabel(),
+        tipo: demanda.tipo.slug,
+        tipoLabel: demanda.tipo.label,
         produtoId: demanda.produtoId,
-        origem: demanda.origem.getValue(),
-        origemLabel: demanda.origem.getLabel(),
-        prioridade: demanda.prioridade.getValue(),
-        prioridadeLabel: demanda.prioridade.getLabel(),
+        origem: demanda.origem.slug,
+        origemLabel: demanda.origem.label,
+        prioridade: demanda.prioridade.slug,
+        prioridadeLabel: demanda.prioridade.label,
         prioridadeColor: demanda.prioridade.getColor(),
-        status: demanda.status.getValue(),
-        statusLabel: demanda.status.getLabel(),
+        status: demanda.status.slug,
+        statusLabel: demanda.status.label,
         responsavelId: demanda.responsavelId,
         criadoPorId: demanda.criadoPorId,
         createdAt: demanda.createdAt!,

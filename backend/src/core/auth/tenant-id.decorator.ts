@@ -4,4 +4,3 @@ export const TenantId = createParamDecorator((_data: unknown, ctx: ExecutionCont
   const request = ctx.switchToHttp().getRequest();
   return request.tenantId ?? request.headers['x-tenant-id'];
 });
-

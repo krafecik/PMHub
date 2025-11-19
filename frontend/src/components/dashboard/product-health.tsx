@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
@@ -100,11 +101,7 @@ export function ProductHealth({ product, metrics }: ProductHealthProps) {
                   </div>
                 </div>
 
-                <Progress
-                  value={percentage}
-                  className="h-2"
-                  indicatorClassName={config.progressColor}
-                />
+                <Progress value={percentage} className="h-2" />
 
                 {metric.description && (
                   <p className="text-xs text-text-muted">{metric.description}</p>

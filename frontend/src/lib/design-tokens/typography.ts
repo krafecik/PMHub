@@ -1,5 +1,5 @@
 /**
- * Sistema de tipografia do CPOPM Hub
+ * Sistema de tipografia do PM Hub
  * Escala tipográfica consistente e hierárquica
  */
 

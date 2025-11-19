@@ -9,9 +9,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     super({
       datasources: {
         db: {
-          url: configService.get('DATABASE_URL', { infer: true })
-        }
-      }
+          url: configService.get('DATABASE_URL', { infer: true }),
+        },
+      },
     });
   }
 
@@ -23,4 +23,3 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     await this.$disconnect();
   }
 }
-

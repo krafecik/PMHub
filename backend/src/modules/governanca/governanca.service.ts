@@ -5,8 +5,7 @@ export class GovernancaService {
   getStatus() {
     return {
       module: 'governanca',
-      ready: false
+      ready: false,
     };
   }
 }
-

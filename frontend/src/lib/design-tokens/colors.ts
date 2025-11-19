@@ -1,5 +1,5 @@
 /**
- * Sistema de cores do CPOPM Hub
+ * Sistema de cores do PM Hub
  * Baseado em Radix UI Colors para consistência e acessibilidade
  */
 

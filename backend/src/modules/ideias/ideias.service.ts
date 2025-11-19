@@ -5,8 +5,7 @@ export class IdeiasService {
   getStatus() {
     return {
       module: 'ideias',
-      ready: false
+      ready: false,
     };
   }
 }
-

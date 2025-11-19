@@ -5,4 +5,3 @@ export class SelectTenantDto {
   @IsNotEmpty()
   tenantId!: string;
 }
-

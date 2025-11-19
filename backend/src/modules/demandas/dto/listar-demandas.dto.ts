@@ -1,27 +1,18 @@
 import { Transform, Type } from 'class-transformer';
-import {
-  IsOptional,
-  IsString,
-  IsEnum,
-  IsArray,
-  IsInt,
-  Min,
-  Max,
-} from 'class-validator';
-import { TipoDemanda, OrigemDemanda, Prioridade, StatusDemanda } from '@prisma/client';
+import { IsOptional, IsString, IsEnum, IsArray, IsInt, Min, Max } from 'class-validator';
 
 export class ListarDemandasDto {
   @IsOptional()
   @IsArray()
-  @IsEnum(StatusDemanda, { each: true })
+  @IsString({ each: true })
   @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
-  status?: StatusDemanda[];
+  status?: string[];
 
   @IsOptional()
   @IsArray()
-  @IsEnum(TipoDemanda, { each: true })
+  @IsString({ each: true })
   @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
-  tipo?: TipoDemanda[];
+  tipo?: string[];
 
   @IsOptional()
   @IsString()
@@ -33,15 +24,15 @@ export class ListarDemandasDto {
 
   @IsOptional()
   @IsArray()
-  @IsEnum(OrigemDemanda, { each: true })
+  @IsString({ each: true })
   @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
-  origem?: OrigemDemanda[];
+  origem?: string[];
 
   @IsOptional()
   @IsArray()
-  @IsEnum(Prioridade, { each: true })
+  @IsString({ each: true })
   @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
-  prioridade?: Prioridade[];
+  prioridade?: string[];
 
   @IsOptional()
   @IsString()

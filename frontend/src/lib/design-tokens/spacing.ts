@@ -1,5 +1,5 @@
 /**
- * Sistema de espaçamento do CPOPM Hub
+ * Sistema de espaçamento do PM Hub
  * Baseado em uma escala consistente para criar ritmo visual
  */
 

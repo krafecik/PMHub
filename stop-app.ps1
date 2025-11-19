@@ -1,8 +1,8 @@
-# Script para parar a aplicação CPOPM
+# Script para parar a aplicação PM Hub
 # Encerra processos nas portas do backend e frontend
 
 param(
-    [int]$BackendPort = 3000,
+    [int]$BackendPort = 3055,
     [int]$FrontendPort = 3056
 )
 
@@ -72,18 +72,18 @@ function Stop-ProcessByPort {
     }
     
     $stopped = $false
-    foreach ($pid in $processIds) {
+    foreach ($processId in $processIds) {
         try {
-            $process = Get-Process -Id $pid -ErrorAction SilentlyContinue
+            $process = Get-Process -Id $processId -ErrorAction SilentlyContinue
             if ($process) {
-                Write-Info "Encerrando processo: $($process.ProcessName) (PID: $pid)"
-                Stop-Process -Id $pid -Force -ErrorAction Stop
-                Write-Success "Processo $($process.ProcessName) (PID: $pid) encerrado"
+                Write-Info "Encerrando processo: $($process.ProcessName) (PID: $processId)"
+                Stop-Process -Id $processId -Force -ErrorAction Stop
+                Write-Success "Processo $($process.ProcessName) (PID: $processId) encerrado"
                 $stopped = $true
             }
         }
         catch {
-            Write-Error "Erro ao encerrar processo PID $pid : $_"
+            Write-Error "Erro ao encerrar processo PID $processId : $_"
         }
     }
     
@@ -107,7 +107,7 @@ function Stop-ProcessByPort {
 # ============================================
 
 Write-Info "=========================================="
-Write-Info "  CPOPM - Parar Aplicação"
+Write-Info "  PM Hub - Parar Aplicação"
 Write-Info "=========================================="
 Write-Output ""
 

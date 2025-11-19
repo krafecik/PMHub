@@ -1,51 +1,58 @@
-export enum OrigemDemanda {
-  CLIENTE = 'CLIENTE',
-  SUPORTE = 'SUPORTE',
-  DIRETORIA = 'DIRETORIA',
-  CS = 'CS',
-  VENDAS = 'VENDAS',
-  INTERNO = 'INTERNO',
-}
+import { CatalogItemProps, CatalogItemVO } from '@domain/shared/value-objects/catalog-item.vo';
+
+const CATALOG_CATEGORY = 'origem_demanda';
 
 export class OrigemDemandaVO {
-  private constructor(private readonly value: OrigemDemanda) {}
+  private constructor(private readonly catalogItem: CatalogItemVO) {}
 
-  static create(value: string): OrigemDemandaVO {
-    if (!Object.values(OrigemDemanda).includes(value as OrigemDemanda)) {
-      throw new Error(`Origem de demanda inválida: ${value}`);
-    }
-    return new OrigemDemandaVO(value as OrigemDemanda);
+  static fromCatalogItem(item: CatalogItemVO): OrigemDemandaVO {
+    item.ensureCategory(CATALOG_CATEGORY);
+    return new OrigemDemandaVO(item);
   }
 
-  static fromEnum(value: OrigemDemanda): OrigemDemandaVO {
-    return new OrigemDemandaVO(value);
+  static create(props: CatalogItemProps): OrigemDemandaVO {
+    const item = CatalogItemVO.create(props);
+    return OrigemDemandaVO.fromCatalogItem(item);
   }
 
-  getValue(): OrigemDemanda {
-    return this.value;
+  get id(): string {
+    return this.catalogItem.id;
+  }
+
+  get slug(): string {
+    return this.catalogItem.slug;
+  }
+
+  get label(): string {
+    return this.catalogItem.label;
+  }
+
+  get metadata(): Record<string, unknown> | null | undefined {
+    return this.catalogItem.metadata;
+  }
+
+  getValue(): string {
+    return this.catalogItem.getLegacyValue();
   }
 
   getLabel(): string {
-    const labels = {
-      [OrigemDemanda.CLIENTE]: 'Cliente',
-      [OrigemDemanda.SUPORTE]: 'Suporte',
-      [OrigemDemanda.DIRETORIA]: 'Diretoria',
-      [OrigemDemanda.CS]: 'Customer Success',
-      [OrigemDemanda.VENDAS]: 'Vendas',
-      [OrigemDemanda.INTERNO]: 'Interno',
-    };
-    return labels[this.value];
+    return this.label;
   }
 
   isExternal(): boolean {
-    return [OrigemDemanda.CLIENTE, OrigemDemanda.SUPORTE].includes(this.value);
+    const externalSlugs = new Set(['cliente', 'suporte']);
+    return externalSlugs.has(this.slug);
   }
 
   equals(other: OrigemDemandaVO): boolean {
-    return this.value === other.value;
+    return this.catalogItem.equals(other.catalogItem);
   }
 
-  toString(): string {
-    return this.value;
+  toCatalogItem(): CatalogItemVO {
+    return this.catalogItem;
+  }
+
+  toJSON(): CatalogItemProps {
+    return this.catalogItem.toJSON();
   }
 }

@@ -12,13 +12,17 @@ import { TenantGuard } from '@core/auth/guards/tenant.guard';
 import { AzureAdProvider } from '@infra/auth';
 import { UserRepository } from '@infra/repositories';
 import { TenantController } from './tenant.controller';
+import { UserManagementController } from './user-management.controller';
+import { MailService } from '@infra/email/mail.service';
+import { MetricsModule } from '@core/metrics/metrics.module';
 
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({})
+    JwtModule.register({}),
+    MetricsModule,
   ],
-  controllers: [AuthController, TenantController],
+  controllers: [AuthController, TenantController, UserManagementController],
   providers: [
     AuthService,
     AuthStateStore,
@@ -28,9 +32,9 @@ import { TenantController } from './tenant.controller';
     RolesGuard,
     TenantGuard,
     AzureAdProvider,
-    UserRepository
+    UserRepository,
+    MailService,
   ],
-  exports: [AuthService, JwtAuthGuard, RolesGuard, TenantGuard]
+  exports: [AuthService, JwtAuthGuard, RolesGuard, TenantGuard],
 })
 export class AuthModule {}
-

@@ -21,9 +21,8 @@ export class HealthController {
       timestamp: new Date().toISOString(),
       services: {
         api: 'up',
-        database
-      }
+        database,
+      },
     };
   }
 }
-

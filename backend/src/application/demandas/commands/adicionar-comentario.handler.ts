@@ -2,8 +2,14 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { AdicionarComentarioCommand } from './adicionar-comentario.command';
 import { Comentario } from '@domain/demandas';
-import { IDemandaRepository, DEMANDA_REPOSITORY_TOKEN } from '@infra/repositories/demandas/demanda.repository.interface';
-import { IComentarioRepository, COMENTARIO_REPOSITORY_TOKEN } from '@infra/repositories/demandas/comentario.repository.interface';
+import {
+  IDemandaRepository,
+  DEMANDA_REPOSITORY_TOKEN,
+} from '@infra/repositories/demandas/demanda.repository.interface';
+import {
+  IComentarioRepository,
+  COMENTARIO_REPOSITORY_TOKEN,
+} from '@infra/repositories/demandas/comentario.repository.interface';
 import { NotFoundException } from '@nestjs/common';
 
 @CommandHandler(AdicionarComentarioCommand)

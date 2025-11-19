@@ -12,15 +12,11 @@ export class TituloVO {
     const trimmedValue = value.trim();
 
     if (trimmedValue.length < TituloVO.MIN_LENGTH) {
-      throw new Error(
-        `Título deve ter no mínimo ${TituloVO.MIN_LENGTH} caracteres`
-      );
+      throw new Error(`Título deve ter no mínimo ${TituloVO.MIN_LENGTH} caracteres`);
     }
 
     if (trimmedValue.length > TituloVO.MAX_LENGTH) {
-      throw new Error(
-        `Título deve ter no máximo ${TituloVO.MAX_LENGTH} caracteres`
-      );
+      throw new Error(`Título deve ter no máximo ${TituloVO.MAX_LENGTH} caracteres`);
     }
 
     return new TituloVO(trimmedValue);

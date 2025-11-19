@@ -4,7 +4,6 @@ import { IdeiasService } from './ideias.service';
 
 @Module({
   controllers: [IdeiasController],
-  providers: [IdeiasService]
+  providers: [IdeiasService],
 })
 export class IdeiasModule {}
-

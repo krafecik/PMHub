@@ -12,4 +12,3 @@ export class MetricasController {
     return this.service.getStatus();
   }
 }
-

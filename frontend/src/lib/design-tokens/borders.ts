@@ -1,5 +1,5 @@
 /**
- * Sistema de bordas do CPOPM Hub
+ * Sistema de bordas do PM Hub
  * Border radius e larguras para componentes
  */
 

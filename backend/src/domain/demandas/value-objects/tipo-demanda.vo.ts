@@ -1,43 +1,53 @@
-export enum TipoDemanda {
-  IDEIA = 'IDEIA',
-  PROBLEMA = 'PROBLEMA',
-  OPORTUNIDADE = 'OPORTUNIDADE',
-  OUTRO = 'OUTRO',
-}
+import { CatalogItemProps, CatalogItemVO } from '@domain/shared/value-objects/catalog-item.vo';
+
+const CATALOG_CATEGORY = 'tipo_demanda';
 
 export class TipoDemandaVO {
-  private constructor(private readonly value: TipoDemanda) {}
+  private constructor(private readonly catalogItem: CatalogItemVO) {}
 
-  static create(value: string): TipoDemandaVO {
-    if (!Object.values(TipoDemanda).includes(value as TipoDemanda)) {
-      throw new Error(`Tipo de demanda inválido: ${value}`);
-    }
-    return new TipoDemandaVO(value as TipoDemanda);
+  static fromCatalogItem(item: CatalogItemVO): TipoDemandaVO {
+    item.ensureCategory(CATALOG_CATEGORY);
+    return new TipoDemandaVO(item);
   }
 
-  static fromEnum(value: TipoDemanda): TipoDemandaVO {
-    return new TipoDemandaVO(value);
+  static create(props: CatalogItemProps): TipoDemandaVO {
+    const item = CatalogItemVO.create(props);
+    return TipoDemandaVO.fromCatalogItem(item);
   }
 
-  getValue(): TipoDemanda {
-    return this.value;
+  get id(): string {
+    return this.catalogItem.id;
+  }
+
+  get slug(): string {
+    return this.catalogItem.slug;
+  }
+
+  get label(): string {
+    return this.catalogItem.label;
+  }
+
+  get metadata(): Record<string, unknown> | null | undefined {
+    return this.catalogItem.metadata;
+  }
+
+  getValue(): string {
+    return this.catalogItem.getLegacyValue();
   }
 
   getLabel(): string {
-    const labels = {
-      [TipoDemanda.IDEIA]: 'Ideia',
-      [TipoDemanda.PROBLEMA]: 'Problema',
-      [TipoDemanda.OPORTUNIDADE]: 'Oportunidade',
-      [TipoDemanda.OUTRO]: 'Outro',
-    };
-    return labels[this.value];
+    return this.label;
   }
 
   equals(other: TipoDemandaVO): boolean {
-    return this.value === other.value;
+    return this.catalogItem.equals(other.catalogItem);
   }
 
-  toString(): string {
-    return this.value;
+  toCatalogItem(): CatalogItemVO {
+    return this.catalogItem;
+  }
+
+  toJSON(): CatalogItemProps {
+    return this.catalogItem.toJSON();
   }
 }

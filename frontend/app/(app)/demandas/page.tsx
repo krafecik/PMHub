@@ -1,29 +1,144 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, Filter, Package2 } from 'lucide-react'
+import {
+  Plus,
+  Search,
+  Lightbulb,
+  Bug,
+  Rocket,
+  FileText,
+  Grid3X3,
+  List,
+  ChevronDown,
+  ChevronUp,
+  ArrowRight,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 import { FloatingActionButton } from '@/components/ui/floating-action-button'
 import { ModalCriarRapida } from '@/components/demandas/modal-criar-rapida'
 import { DemandaDrawer } from '@/components/demandas/demanda-drawer'
+import { DemandaCard } from '@/components/demandas/demanda-card'
+import { DemandasTableView } from '@/components/demandas/demandas-table-view'
+import { StatsHeader } from '@/components/ui/stats-header'
+import { SkeletonCard } from '@/components/ui/skeleton-card'
+import { AnimatedEmptyState, AnimatedIllustration } from '@/components/ui/animated-empty-state'
+import { HelpButton, demandasHelpContent } from '@/components/ui/help-button'
 import { listarDemandas } from '@/lib/demandas-api'
-import { formatRelativeDate } from '@/lib/utils'
-import { FadeIn } from '@/components/motion'
+import { triarDemandasEmLote } from '@/lib/triagem-api'
+import { useMutation } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { FadeIn, StaggerChildren } from '@/components/motion'
+import { AnimatePresence, motion } from 'framer-motion'
+import { cn } from '@/lib/utils'
+import { StatusDemanda, TipoDemanda, Prioridade } from '@/lib/enums'
+
+type ViewMode = 'cards' | 'table'
 
 export default function DemandasPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [selectedDemandaId, setSelectedDemandaId] = useState<string | null>(null)
+  const [drawerEditMode, setDrawerEditMode] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [viewMode, setViewMode] = useState<ViewMode>('table')
+  const [filtersExpanded, setFiltersExpanded] = useState(false)
+  const [selectedFilters, setSelectedFilters] = useState<{
+    tipo?: string
+    status?: string[]
+    prioridade?: string
+  }>({})
+  const [selectedDemandaIds, setSelectedDemandaIds] = useState<string[]>([])
+  const [showArquivadas, setShowArquivadas] = useState(false)
+
   const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery({
-    queryKey: ['demandas'],
-    queryFn: () => listarDemandas(),
+    queryKey: ['demandas', selectedFilters],
+    queryFn: () => {
+      // Converter strings para enums antes de passar para a API
+      const params = {
+        ...selectedFilters,
+        tipo: selectedFilters.tipo ? [selectedFilters.tipo as TipoDemanda] : undefined,
+        status: selectedFilters.status?.map((s) => s as StatusDemanda),
+        prioridade: selectedFilters.prioridade
+          ? [selectedFilters.prioridade as Prioridade]
+          : undefined,
+      }
+      return listarDemandas(params)
+    },
   })
+
+  // Calcular estatísticas
+  const stats = useMemo(() => {
+    if (!data?.data) return []
+
+    const demandas = data.data
+    const total = demandas.length
+    const porTipo = {
+      ideias: demandas.filter((d) => d.tipo === 'IDEIA').length,
+      problemas: demandas.filter((d) => d.tipo === 'PROBLEMA').length,
+      oportunidades: demandas.filter((d) => d.tipo === 'OPORTUNIDADE').length,
+    }
+
+    return [
+      {
+        label: 'Total de Demandas',
+        value: total,
+        icon: <FileText className="h-4 w-4" />,
+        color: 'primary' as const,
+      },
+      {
+        label: 'Ideias',
+        value: porTipo.ideias,
+        icon: <Lightbulb className="h-4 w-4" />,
+        color: 'warning' as const,
+      },
+      {
+        label: 'Problemas',
+        value: porTipo.problemas,
+        icon: <Bug className="h-4 w-4" />,
+        color: 'error' as const,
+      },
+      {
+        label: 'Oportunidades',
+        value: porTipo.oportunidades,
+        icon: <Rocket className="h-4 w-4" />,
+        color: 'accent' as const,
+      },
+    ]
+  }, [data])
+
+  // Filtrar demandas localmente pela busca e status arquivado
+  const filteredDemandas = useMemo(() => {
+    if (!data?.data) return []
+
+    let filtered = data.data
+
+    // Filtrar demandas arquivadas se o checkbox não estiver marcado
+    if (!showArquivadas) {
+      filtered = filtered.filter(
+        (demanda) => demanda.status.toUpperCase() !== StatusDemanda.ARQUIVADO,
+      )
+    }
+
+    // Filtrar pela busca
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (demanda) =>
+          demanda.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          demanda.tipoLabel.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+    }
+
+    return filtered
+  }, [data?.data, searchTerm, showArquivadas])
 
   const handleCriarDemanda = () => {
     setModalOpen(true)
@@ -37,7 +152,64 @@ export default function DemandasPage() {
 
   const handleOpenDemanda = (demandaId: string) => {
     setSelectedDemandaId(demandaId)
+    setDrawerEditMode(false)
     setDrawerOpen(true)
+  }
+
+  const handleEditDemanda = (demandaId: string) => {
+    setSelectedDemandaId(demandaId)
+    setDrawerEditMode(true)
+    setDrawerOpen(true)
+  }
+
+  const toggleFilter = (filterType: 'tipo' | 'status' | 'prioridade', value: string) => {
+    setSelectedFilters((prev) => {
+      if (filterType === 'status') {
+        // Para status, trabalhamos com array
+        const currentStatus = prev.status || []
+        const hasStatus = currentStatus.includes(value)
+        return {
+          ...prev,
+          status: hasStatus ? currentStatus.filter((s) => s !== value) : [...currentStatus, value],
+        }
+      }
+      // Para outros filtros, continuamos com string única
+      return {
+        ...prev,
+        [filterType]: prev[filterType] === value ? undefined : value,
+      }
+    })
+  }
+
+  // Mutation para triagem em lote
+  const { mutate: moverParaTriagemEmLote, isPending: isMovingToTriagem } = useMutation({
+    mutationFn: async (demandaIds: string[]) => {
+      return triarDemandasEmLote(demandaIds)
+    },
+    onSuccess: (result) => {
+      const { sucesso, falhas } = result
+      queryClient.invalidateQueries({ queryKey: ['demandas'] })
+      queryClient.invalidateQueries({ queryKey: ['triagem'] })
+      setSelectedDemandaIds([])
+
+      if (falhas.length === 0) {
+        toast.success(`${sucesso.length} demanda(s) movida(s) para triagem com sucesso!`)
+      } else if (sucesso.length > 0) {
+        toast.warning(
+          `${sucesso.length} demanda(s) movida(s) com sucesso, mas ${falhas.length} falharam.`,
+        )
+      } else {
+        toast.error('Não foi possível mover as demandas para triagem.')
+      }
+    },
+    onError: (error: unknown) => {
+      toast.error(error instanceof Error ? error.message : 'Erro ao mover demandas para triagem.')
+    },
+  })
+
+  const handleMoverParaTriagemEmLote = () => {
+    if (selectedDemandaIds.length === 0) return
+    moverParaTriagemEmLote(selectedDemandaIds)
   }
 
   return (
@@ -46,118 +218,258 @@ export default function DemandasPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-text-primary">Demandas</h1>
-            <p className="mt-2 text-text-secondary">
+            <h1 className="text-2xl font-semibold text-text-primary">Demandas</h1>
+            <p className="mt-1 text-sm text-text-secondary">
               Todas as ideias, problemas e oportunidades em um só lugar
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
-              <Filter className="mr-2 h-4 w-4" />
-              Filtros
+          <div className="flex items-center gap-2">
+            <HelpButton title="Ajuda - Central de Demandas" content={demandasHelpContent} />
+            <Button
+              variant="gradient"
+              size="sm"
+              onClick={handleCriarDemanda}
+              className="hidden sm:inline-flex"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Nova Demanda
             </Button>
           </div>
         </div>
 
-        {/* Busca */}
-        <Card variant="elevated">
-          <CardContent className="p-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-              <Input placeholder="Buscar por título, descrição ou tags..." className="pl-9" />
-            </div>
-          </CardContent>
-        </Card>
+        {/* Stats */}
+        {!isLoading && <StatsHeader stats={stats} className="mt-4" />}
 
-        {/* Lista de demandas */}
-        <Card variant="elevated">
-          <CardHeader>
-            <CardTitle>Demandas recentes</CardTitle>
-            <CardDescription>
-              {data
-                ? `${data.total} demanda${data.total !== 1 ? 's' : ''} encontrada${data.total !== 1 ? 's' : ''}`
-                : 'Carregando...'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
-            {isLoading ? (
-              <div className="flex h-32 items-center justify-center">
-                <div className="space-y-2 text-center">
-                  <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-primary-600 border-t-transparent" />
-                  <p className="text-sm text-text-muted">Carregando demandas...</p>
-                </div>
+        {/* Filters and Search */}
+        <Card variant="elevated" className="mt-4">
+          <div className="p-6">
+            {/* Header com busca e botão de colapsar */}
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+                <Input
+                  placeholder="Buscar por título ou tipo..."
+                  className="pl-9"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
-            ) : data && data.data.length > 0 ? (
-              <div className="divide-y divide-border">
-                {data.data.map((demanda) => (
-                  <div
-                    key={demanda.id}
-                    className="flex cursor-pointer items-start gap-4 px-6 py-4 transition-colors hover:bg-secondary-50"
-                    onClick={() => handleOpenDemanda(demanda.id)}
-                  >
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-600">
-                      <Package2 className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="min-w-0 flex-1">
-                          <h4 className="truncate font-medium text-text-primary">
-                            {demanda.titulo}
-                          </h4>
-                          <div className="mt-1 flex flex-wrap items-center gap-2">
-                            <Badge variant="secondary" className="text-xs">
-                              {demanda.tipoLabel}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              {demanda.origemLabel}
-                            </Badge>
-                            <span className="text-xs text-text-muted">
-                              • {formatRelativeDate(demanda.createdAt)}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex flex-shrink-0 items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setFiltersExpanded(!filtersExpanded)}
+                className="h-9 w-9"
+                title={filtersExpanded ? 'Colapsar filtros' : 'Expandir filtros'}
+              >
+                {filtersExpanded ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+
+            {/* Quick Filters - Colapsável */}
+            <AnimatePresence initial={false}>
+              {filtersExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2, ease: 'easeInOut' }}
+                  className="mt-4 space-y-4 overflow-hidden"
+                >
+                  <div className="flex flex-wrap gap-6">
+                    {/* Tipo Filters */}
+                    <div>
+                      <p className="mb-2 text-xs font-medium text-text-muted">Tipo</p>
+                      <div className="flex flex-wrap gap-2">
+                        {['IDEIA', 'PROBLEMA', 'OPORTUNIDADE'].map((tipo) => (
                           <Badge
-                            variant={
-                              demanda.prioridade === 'CRITICA'
-                                ? 'destructive'
-                                : demanda.prioridade === 'ALTA'
-                                  ? 'warning'
-                                  : demanda.prioridade === 'MEDIA'
-                                    ? 'secondary'
-                                    : 'outline'
-                            }
+                            key={tipo}
+                            variant={selectedFilters.tipo === tipo ? 'default' : 'outline'}
+                            className={cn(
+                              'cursor-pointer transition-all',
+                              selectedFilters.tipo === tipo &&
+                                'ring-2 ring-primary-500 ring-offset-2',
+                            )}
+                            onClick={() => toggleFilter('tipo', tipo)}
                           >
-                            {demanda.prioridadeLabel}
+                            {tipo === 'IDEIA' && <Lightbulb className="mr-1 h-3 w-3" />}
+                            {tipo === 'PROBLEMA' && <Bug className="mr-1 h-3 w-3" />}
+                            {tipo === 'OPORTUNIDADE' && <Rocket className="mr-1 h-3 w-3" />}
+                            {tipo.charAt(0) + tipo.slice(1).toLowerCase()}
                           </Badge>
-                          <Badge variant={demanda.status === 'NOVO' ? 'success' : 'secondary'}>
-                            {demanda.statusLabel}
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Status Filters */}
+                    <div>
+                      <p className="mb-2 text-xs font-medium text-text-muted">Status</p>
+                      <div className="flex flex-wrap gap-2">
+                        {['NOVO', 'TRIAGEM', 'ARQUIVADO'].map((status) => (
+                          <Badge
+                            key={status}
+                            variant={
+                              selectedFilters.status?.includes(status) ? 'default' : 'outline'
+                            }
+                            className={cn(
+                              'cursor-pointer transition-all',
+                              selectedFilters.status?.includes(status) &&
+                                'ring-2 ring-primary-500 ring-offset-2',
+                            )}
+                            onClick={() => toggleFilter('status', status)}
+                          >
+                            {status.charAt(0) + status.slice(1).toLowerCase()}
                           </Badge>
-                        </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Priority Filters */}
+                    <div>
+                      <p className="mb-2 text-xs font-medium text-text-muted">Prioridade</p>
+                      <div className="flex flex-wrap gap-2">
+                        {['BAIXA', 'MEDIA', 'ALTA', 'CRITICA'].map((prioridade) => (
+                          <Badge
+                            key={prioridade}
+                            variant={
+                              selectedFilters.prioridade === prioridade ? 'default' : 'outline'
+                            }
+                            className={cn(
+                              'cursor-pointer transition-all',
+                              selectedFilters.prioridade === prioridade &&
+                                'ring-2 ring-primary-500 ring-offset-2',
+                            )}
+                            onClick={() => toggleFilter('prioridade', prioridade)}
+                          >
+                            {prioridade === 'MEDIA'
+                              ? 'Média'
+                              : prioridade.charAt(0) + prioridade.slice(1).toLowerCase()}
+                          </Badge>
+                        ))}
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center px-6 py-12">
-                <div className="rounded-full bg-secondary-100 p-3">
-                  <Package2 className="h-8 w-8 text-text-muted" />
-                </div>
-                <h3 className="mt-4 text-base font-medium text-text-primary">
-                  Nenhuma demanda cadastrada
-                </h3>
-                <p className="mt-2 max-w-sm text-center text-sm text-text-secondary">
-                  Comece criando sua primeira demanda para organizar ideias e problemas
-                </p>
-                <Button variant="outline" className="mt-6" onClick={handleCriarDemanda}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Criar primeira demanda
-                </Button>
-              </div>
-            )}
-          </CardContent>
+
+                  {/* Mostrar arquivadas */}
+                  <div className="flex items-center gap-2 border-t pt-4">
+                    <Checkbox
+                      id="show-archived"
+                      checked={showArquivadas}
+                      onCheckedChange={(checked) => setShowArquivadas(checked === true)}
+                    />
+                    <Label
+                      htmlFor="show-archived"
+                      className="cursor-pointer text-sm font-medium text-text-secondary"
+                    >
+                      Mostrar arquivadas
+                    </Label>
+                  </div>
+
+                  {/* View Mode Selector */}
+                  <div className="flex items-center gap-1 rounded-lg border p-1">
+                    <Button
+                      variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => setViewMode('cards')}
+                      title="Visualização em cards"
+                    >
+                      <Grid3X3 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => setViewMode('table')}
+                      title="Visualização em tabela"
+                    >
+                      <List className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </Card>
+
+        {/* Barra de ações em lote */}
+        {selectedDemandaIds.length > 0 && (
+          <Card variant="elevated" className="mt-8">
+            <div className="flex items-center justify-between p-4">
+              <span className="text-sm font-medium text-text-primary">
+                {selectedDemandaIds.length}{' '}
+                {selectedDemandaIds.length === 1 ? 'demanda selecionada' : 'demandas selecionadas'}
+              </span>
+              <Button
+                variant="default"
+                onClick={handleMoverParaTriagemEmLote}
+                disabled={isMovingToTriagem}
+                loading={isMovingToTriagem}
+              >
+                <ArrowRight className="mr-2 h-4 w-4" />
+                Enviar para Triagem
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {/* Grid de Demandas */}
+        <div className="mt-6">
+          {isLoading ? (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <SkeletonCard variant="demanda" count={6} />
+            </div>
+          ) : filteredDemandas && filteredDemandas.length > 0 ? (
+            <>
+              {viewMode === 'cards' && (
+                <StaggerChildren className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredDemandas.map((demanda, index) => (
+                    <DemandaCard
+                      key={demanda.id}
+                      demanda={demanda}
+                      onClick={() => handleOpenDemanda(demanda.id)}
+                      onEdit={() => handleEditDemanda(demanda.id)}
+                      index={index}
+                    />
+                  ))}
+                </StaggerChildren>
+              )}
+              {viewMode === 'table' && (
+                <DemandasTableView
+                  demandas={filteredDemandas}
+                  onSelect={(demandaId) => handleOpenDemanda(demandaId)}
+                  onEdit={(demandaId) => handleEditDemanda(demandaId)}
+                  onSelectionChange={setSelectedDemandaIds}
+                />
+              )}
+            </>
+          ) : (
+            <Card variant="elevated" className="p-12">
+              {searchTerm || Object.keys(selectedFilters).length > 0 ? (
+                <AnimatedEmptyState
+                  icon={<AnimatedIllustration type="search" />}
+                  title="Nenhuma demanda encontrada"
+                  description="Tente ajustar os filtros ou termos de busca"
+                />
+              ) : (
+                <AnimatedEmptyState
+                  icon={<AnimatedIllustration type="empty" />}
+                  title="Nenhuma demanda cadastrada"
+                  description="Comece criando sua primeira demanda para organizar ideias e problemas"
+                  action={
+                    <Button variant="gradient" onClick={handleCriarDemanda}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Criar primeira demanda
+                    </Button>
+                  }
+                />
+              )}
+            </Card>
+          )}
+        </div>
       </FadeIn>
 
       {/* Botão flutuante */}
@@ -169,7 +481,17 @@ export default function DemandasPage() {
       <ModalCriarRapida open={modalOpen} onOpenChange={setModalOpen} onSuccess={handleSuccess} />
 
       {/* Drawer de detalhes */}
-      <DemandaDrawer demandaId={selectedDemandaId} open={drawerOpen} onOpenChange={setDrawerOpen} />
+      <DemandaDrawer
+        demandaId={selectedDemandaId}
+        open={drawerOpen}
+        onOpenChange={(open) => {
+          setDrawerOpen(open)
+          if (!open) {
+            setDrawerEditMode(false)
+          }
+        }}
+        initialEditMode={drawerEditMode}
+      />
     </div>
   )
 }

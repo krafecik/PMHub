@@ -22,11 +22,10 @@ export class TenantController {
   async select(
     @Body() body: SelectTenantDto,
     @CurrentUser() user: JwtAccessPayload,
-    @Res({ passthrough: true }) response: Response
+    @Res({ passthrough: true }) response: Response,
   ): Promise<AuthSessionResponseDto> {
     const session = await this.authService.switchTenant(user, body.tenantId);
     response.cookie(REFRESH_TOKEN_COOKIE, session.tokens.refreshToken, getRefreshCookieOptions());
     return AuthSessionResponseDto.fromDomain(session);
   }
 }
-

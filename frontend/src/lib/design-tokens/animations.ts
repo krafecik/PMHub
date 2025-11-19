@@ -1,5 +1,5 @@
 /**
- * Sistema de animações do CPOPM Hub
+ * Sistema de animações do PM Hub
  * Transições e animações consistentes para microinterações
  */
 

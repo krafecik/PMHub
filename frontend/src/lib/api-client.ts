@@ -28,15 +28,25 @@ async function parseResponse<T>(response: Response): Promise<T> {
 }
 
 async function refreshSession() {
-  const { setSession, clearSession } = useAuthStore.getState()
+  const { setSession, clearSession, currentTenantId } = useAuthStore.getState()
 
   try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    }
+
+    if (currentTenantId) {
+      headers['X-Tenant-Id'] = currentTenantId
+    }
+
     const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
       method: 'POST',
+      headers,
       credentials: 'include',
     })
 
     if (!response.ok) {
+      // Se o refresh falhou, limpar sessão silenciosamente
       clearSession()
       return null
     }
@@ -45,6 +55,7 @@ async function refreshSession() {
     setSession(data)
     return data
   } catch (error) {
+    // Erro de rede ou outro erro - limpar sessão silenciosamente
     clearSession()
     return null
   }
@@ -78,7 +89,9 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     const session = await refreshSession()
 
     if (!session) {
-      throw new Error('Sessão expirada. Faça login novamente.')
+      // Se o refresh falhou, redirecionar para login sem mostrar erro no console
+      window.location.href = '/login'
+      return Promise.reject(new Error('Sessão expirada'))
     }
 
     const retryHeaders = new Headers(fetchOptions.headers)
@@ -108,8 +121,21 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
       throw new Error('Permissão insuficiente para executar esta ação.')
     }
 
-    const errorBody = await parseResponse<{ message?: string }>(response as Response)
-    throw new Error(errorBody.message ?? 'Erro inesperado na API.')
+    try {
+      const errorBody = await parseResponse<{ message?: string; error?: string }>(
+        response as Response,
+      )
+      const errorMessage =
+        errorBody.message || errorBody.error || `Erro ${response.status}: ${response.statusText}`
+      throw new Error(errorMessage)
+    } catch (error) {
+      // Se já é um Error, re-lançar
+      if (error instanceof Error) {
+        throw error
+      }
+      // Caso contrário, criar um novo erro com informações do status
+      throw new Error(`Erro ${response.status}: ${response.statusText}`)
+    }
   }
 
   return parseResponse<T>(response)

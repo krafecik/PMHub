@@ -1,8 +1,8 @@
-# Script para iniciar a aplicação CPOPM
+# Script para iniciar a aplicação PM Hub
 # Verifica e libera portas, depois inicia backend e frontend
 
 param(
-    [int]$BackendPort = 3000,
+    [int]$BackendPort = 3055,
     [int]$FrontendPort = 3056,
     [switch]$SkipPortCheck
 )
@@ -70,17 +70,17 @@ function Stop-ProcessByPort {
             return $false
         }
         
-        foreach ($pid in $processIds) {
+        foreach ($processId in $processIds) {
             try {
-                $process = Get-Process -Id $pid -ErrorAction SilentlyContinue
+                $process = Get-Process -Id $processId -ErrorAction SilentlyContinue
                 if ($process) {
-                    Write-Warning "Encerrando processo: $($process.ProcessName) (PID: $pid)"
-                    Stop-Process -Id $pid -Force -ErrorAction Stop
-                    Write-Success "Processo $($process.ProcessName) (PID: $pid) encerrado com sucesso"
+                    Write-Warning "Encerrando processo: $($process.ProcessName) (PID: $processId)"
+                    Stop-Process -Id $processId -Force -ErrorAction Stop
+                    Write-Success "Processo $($process.ProcessName) (PID: $processId) encerrado com sucesso"
                 }
             }
             catch {
-                Write-Error "Erro ao encerrar processo PID $pid : $_"
+                Write-Error "Erro ao encerrar processo PID $processId : $_"
                 return $false
             }
         }
@@ -190,7 +190,7 @@ npm run dev
 # ============================================
 
 Write-Info "=========================================="
-Write-Info "  CPOPM - Iniciador de Aplicação"
+Write-Info "  PM Hub - Iniciador de Aplicação"
 Write-Info "=========================================="
 Write-Output ""
 

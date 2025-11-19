@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  UseGuards
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ProdutoService, ProdutoView } from './produto.service';
 import { JwtAuthGuard } from '@core/auth/guards/jwt-auth.guard';
 import { TenantGuard } from '@core/auth/guards/tenant.guard';
@@ -35,7 +26,7 @@ export class ProdutoController {
   async create(
     @TenantId() tenantId: string,
     @Body() body: CreateProdutoDto,
-    @CurrentUser() user: JwtAccessPayload
+    @CurrentUser() user: JwtAccessPayload,
   ): Promise<ProdutoView> {
     return this.produtoService.create(tenantId.toString(), body, user);
   }
@@ -51,7 +42,7 @@ export class ProdutoController {
     @TenantId() tenantId: string,
     @Param('id') id: string,
     @Body() body: UpdateProdutoDto,
-    @CurrentUser() user: JwtAccessPayload
+    @CurrentUser() user: JwtAccessPayload,
   ): Promise<ProdutoView> {
     return this.produtoService.update(tenantId.toString(), id, body, user);
   }
@@ -61,10 +52,9 @@ export class ProdutoController {
   async remove(
     @TenantId() tenantId: string,
     @Param('id') id: string,
-    @CurrentUser() user: JwtAccessPayload
+    @CurrentUser() user: JwtAccessPayload,
   ): Promise<{ message: string }> {
     await this.produtoService.remove(tenantId.toString(), id, user);
     return { message: 'Produto removido com sucesso.' };
   }
 }
-

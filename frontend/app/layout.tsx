@@ -3,9 +3,11 @@ import type { Metadata } from 'next'
 import { AppProvider } from '@/providers/app-provider'
 
 export const metadata: Metadata = {
-  title: 'CPOPM Hub',
+  title: 'PM Hub',
   description: 'ProductOps Hub para CPOs e PMs',
 }
+
+export const dynamic = 'force-dynamic'
 
 type RootLayoutProps = {
   children: React.ReactNode

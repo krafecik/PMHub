@@ -45,8 +45,7 @@ export function Comentarios({ demandaId }: ComentariosProps) {
     },
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = () => {
     const texto = novoComentario.trim()
     if (texto) {
       enviarComentario(texto)
@@ -69,7 +68,9 @@ export function Comentarios({ demandaId }: ComentariosProps) {
             <div key={comentario.id} className="space-y-2 rounded-lg bg-secondary-50 p-4">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2 text-sm text-text-secondary">
-                  <span className="font-medium">Usuário #{comentario.usuarioId}</span>
+                  <span className="font-medium">
+                    {comentario.usuarioNome || `Usuário #${comentario.usuarioId}`}
+                  </span>
                   <span>•</span>
                   <div className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
@@ -97,7 +98,7 @@ export function Comentarios({ demandaId }: ComentariosProps) {
       </div>
 
       {/* Formulário para novo comentário */}
-      <form onSubmit={handleSubmit} className="space-y-3 border-t pt-4">
+      <div className="space-y-3 border-t pt-4">
         <Textarea
           placeholder="Adicione um comentário..."
           value={novoComentario}
@@ -107,16 +108,17 @@ export function Comentarios({ demandaId }: ComentariosProps) {
         />
         <div className="flex justify-end">
           <Button
-            type="submit"
+            type="button"
             size="sm"
             disabled={!novoComentario.trim() || isPending}
             loading={isPending}
+            onClick={handleSubmit}
           >
             <Send className="mr-2 h-4 w-4" />
             Enviar comentário
           </Button>
         </div>
-      </form>
+      </div>
     </div>
   )
 }

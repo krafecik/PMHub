@@ -8,7 +8,7 @@ export class DemandaCriadaEvent {
     public readonly origem: string,
     public readonly criadoPorId: string,
     public readonly prioridade: string,
-    public readonly occurredAt: Date = new Date()
+    public readonly occurredAt: Date = new Date(),
   ) {}
 
   getAggregateId(): string {

@@ -9,10 +9,21 @@ export class ComentarioRepository implements IComentarioRepository {
 
   async save(comentario: Comentario): Promise<string> {
     const data = this.toPrisma(comentario);
-    
+
+    // Buscar tenant_id da demanda
+    const demanda = await this.prisma.demanda.findUnique({
+      where: { id: BigInt(data.demanda_id) },
+      select: { tenant_id: true },
+    });
+
+    if (!demanda) {
+      throw new Error(`Demanda ${data.demanda_id} não encontrada`);
+    }
+
     const created = await this.prisma.comentario.create({
       data: {
         demanda_id: BigInt(data.demanda_id),
+        tenant_id: demanda.tenant_id,
         usuario_id: BigInt(data.usuario_id),
         texto: data.texto,
       },
@@ -36,7 +47,7 @@ export class ComentarioRepository implements IComentarioRepository {
 
   async update(comentario: Comentario): Promise<void> {
     if (!comentario.id) throw new Error('Comentário sem ID não pode ser atualizado');
-    
+
     await this.prisma.comentario.update({
       where: { id: BigInt(comentario.id) },
       data: {

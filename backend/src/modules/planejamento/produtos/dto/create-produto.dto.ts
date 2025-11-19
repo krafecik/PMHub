@@ -16,4 +16,3 @@ export class CreateProdutoDto {
   @IsEnum(ProdutoStatus)
   status?: ProdutoStatus;
 }
-

@@ -4,7 +4,6 @@ import { GovernancaService } from './governanca.service';
 
 @Module({
   controllers: [GovernancaController],
-  providers: [GovernancaService]
+  providers: [GovernancaService],
 })
 export class GovernancaModule {}
-

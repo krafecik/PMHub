@@ -1,9 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { TenantRole } from '@prisma/client';
 import { JwtAccessPayload } from '../jwt-token.service';
@@ -16,7 +11,7 @@ export class RolesGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<TenantRole[]>(ROLES_KEY, [
       context.getHandler(),
-      context.getClass()
+      context.getClass(),
     ]);
 
     if (!requiredRoles || requiredRoles.length === 0) {
@@ -40,4 +35,3 @@ export class RolesGuard implements CanActivate {
     return true;
   }
 }
-

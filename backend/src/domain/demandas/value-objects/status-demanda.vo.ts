@@ -1,70 +1,98 @@
-export enum StatusDemanda {
-  NOVO = 'NOVO',
-  RASCUNHO = 'RASCUNHO',
-  TRIAGEM = 'TRIAGEM',
-  ARQUIVADO = 'ARQUIVADO',
-}
+import { CatalogItemProps, CatalogItemVO } from '@domain/shared/value-objects/catalog-item.vo';
+
+const CATALOG_CATEGORY = 'status_demanda';
+
+const DEFAULT_TRANSITIONS: Record<string, string[]> = {
+  novo: ['rascunho', 'triagem', 'arquivado'],
+  rascunho: ['novo', 'triagem', 'arquivado'],
+  triagem: ['arquivado'],
+  arquivado: [],
+};
 
 export class StatusDemandaVO {
-  private constructor(private readonly value: StatusDemanda) {}
+  private constructor(private readonly catalogItem: CatalogItemVO) {}
 
-  static create(value: string): StatusDemandaVO {
-    if (!Object.values(StatusDemanda).includes(value as StatusDemanda)) {
-      throw new Error(`Status de demanda inválido: ${value}`);
-    }
-    return new StatusDemandaVO(value as StatusDemanda);
+  static fromCatalogItem(item: CatalogItemVO): StatusDemandaVO {
+    item.ensureCategory(CATALOG_CATEGORY);
+    return new StatusDemandaVO(item);
   }
 
-  static fromEnum(value: StatusDemanda): StatusDemandaVO {
-    return new StatusDemandaVO(value);
+  static create(props: CatalogItemProps): StatusDemandaVO {
+    const item = CatalogItemVO.create(props);
+    return StatusDemandaVO.fromCatalogItem(item);
   }
 
-  static novo(): StatusDemandaVO {
-    return new StatusDemandaVO(StatusDemanda.NOVO);
+  get id(): string {
+    return this.catalogItem.id;
   }
 
-  static rascunho(): StatusDemandaVO {
-    return new StatusDemandaVO(StatusDemanda.RASCUNHO);
+  get slug(): string {
+    return this.catalogItem.slug;
   }
 
-  getValue(): StatusDemanda {
-    return this.value;
+  get label(): string {
+    return this.catalogItem.label;
+  }
+
+  getValue(): string {
+    return this.catalogItem.getLegacyValue();
   }
 
   getLabel(): string {
-    const labels = {
-      [StatusDemanda.NOVO]: 'Novo',
-      [StatusDemanda.RASCUNHO]: 'Rascunho',
-      [StatusDemanda.TRIAGEM]: 'Triagem',
-      [StatusDemanda.ARQUIVADO]: 'Arquivado',
-    };
-    return labels[this.value];
+    return this.label;
+  }
+
+  private get metadata(): Record<string, unknown> | null | undefined {
+    return this.catalogItem.metadata;
+  }
+
+  private getAllowedTransitions(): string[] {
+    const metaTransitions =
+      this.metadata && (this.metadata['allowedTransitions'] as string[] | undefined);
+    if (metaTransitions && Array.isArray(metaTransitions)) {
+      return metaTransitions;
+    }
+    return DEFAULT_TRANSITIONS[this.slug] ?? [];
+  }
+
+  private getEditableFlag(): boolean {
+    const metaEditable = this.metadata && (this.metadata['isEditable'] as boolean | undefined);
+    if (typeof metaEditable === 'boolean') {
+      return metaEditable;
+    }
+    return ['novo', 'rascunho'].includes(this.slug);
+  }
+
+  private getTerminalFlag(): boolean {
+    const metaTerminal = this.metadata && (this.metadata['isTerminal'] as boolean | undefined);
+    if (typeof metaTerminal === 'boolean') {
+      return metaTerminal;
+    }
+    return this.getAllowedTransitions().length === 0;
   }
 
   canTransitionTo(newStatus: StatusDemandaVO): boolean {
-    const allowedTransitions: Record<StatusDemanda, StatusDemanda[]> = {
-      [StatusDemanda.NOVO]: [StatusDemanda.RASCUNHO, StatusDemanda.TRIAGEM, StatusDemanda.ARQUIVADO],
-      [StatusDemanda.RASCUNHO]: [StatusDemanda.NOVO, StatusDemanda.TRIAGEM, StatusDemanda.ARQUIVADO],
-      [StatusDemanda.TRIAGEM]: [StatusDemanda.ARQUIVADO],
-      [StatusDemanda.ARQUIVADO]: [], // Não pode transicionar para nenhum status
-    };
-
-    return allowedTransitions[this.value].includes(newStatus.getValue());
+    const allowed = this.getAllowedTransitions();
+    return allowed.includes(newStatus.slug);
   }
 
   isActive(): boolean {
-    return this.value !== StatusDemanda.ARQUIVADO;
+    return !this.getTerminalFlag();
   }
 
   isEditable(): boolean {
-    return [StatusDemanda.NOVO, StatusDemanda.RASCUNHO].includes(this.value);
+    return this.getEditableFlag();
   }
 
   equals(other: StatusDemandaVO): boolean {
-    return this.value === other.value;
+    return this.catalogItem.equals(other.catalogItem);
   }
 
-  toString(): string {
-    return this.value;
+  toCatalogItem(): CatalogItemVO {
+    return this.catalogItem;
+  }
+
+  toJSON(): CatalogItemProps {
+    return this.catalogItem.toJSON();
   }
 }

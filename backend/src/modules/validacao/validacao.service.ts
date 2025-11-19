@@ -5,8 +5,7 @@ export class ValidacaoService {
   getStatus() {
     return {
       module: 'validacao',
-      ready: false
+      ready: false,
     };
   }
 }
-

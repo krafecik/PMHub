@@ -19,7 +19,7 @@ export class AuthStateStore {
     this.store.set(state, {
       codeVerifier: pkce.codeVerifier,
       createdAt: Date.now(),
-      expiresAt: Date.now() + this.ttlMs
+      expiresAt: Date.now() + this.ttlMs,
     });
 
     return { state, pkce };
@@ -40,4 +40,3 @@ export class AuthStateStore {
     return stored;
   }
 }
-

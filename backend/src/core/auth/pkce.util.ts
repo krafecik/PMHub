@@ -11,4 +11,3 @@ export const createPkcePair = (): PkcePair => {
 
   return { codeVerifier, codeChallenge };
 };
-

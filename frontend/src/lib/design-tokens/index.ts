@@ -1,5 +1,5 @@
 /**
- * Design Tokens centralizados do CPOPM Hub
+ * Design Tokens centralizados do PM Hub
  * Exporta todos os tokens para uso consistente
  */
 

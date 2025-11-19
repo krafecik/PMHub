@@ -12,4 +12,3 @@ export class ValidacaoController {
     return this.service.getStatus();
   }
 }
-

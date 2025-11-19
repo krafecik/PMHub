@@ -12,4 +12,3 @@ export class GovernancaController {
     return this.service.getStatus();
   }
 }
-

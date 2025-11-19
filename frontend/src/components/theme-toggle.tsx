@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Moon, Sun, Monitor } from 'lucide-react'
 import { useTheme } from '@/providers/theme-provider'
 import { Button } from '@/components/ui/button'
@@ -8,6 +9,7 @@ import { cn } from '@/lib/utils'
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
+  const [open, setOpen] = useState(false)
 
   const themes = [
     { value: 'light', label: 'Claro', icon: Sun },
@@ -16,7 +18,7 @@ export function ThemeToggle() {
   ] as const
 
   return (
-    <DropdownMenu.Root>
+    <DropdownMenu.Root open={open} onOpenChange={setOpen}>
       <DropdownMenu.Trigger asChild>
         <Button variant="ghost" size="icon" className="h-9 w-9">
           <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -51,7 +53,11 @@ export function ThemeToggle() {
                   isSelected &&
                     'bg-primary-50 text-primary-700 dark:bg-primary-950 dark:text-primary-400',
                 )}
-                onSelect={() => setTheme(themeOption.value)}
+                onSelect={(e) => {
+                  e.preventDefault()
+                  setTheme(themeOption.value)
+                  setOpen(false)
+                }}
               >
                 <Icon className="h-4 w-4" />
                 <span className="flex-1">{themeOption.label}</span>

@@ -1,6 +1,6 @@
 # Scripts de Gerenciamento da Aplicação
 
-Este diretório contém scripts PowerShell para facilitar o gerenciamento da aplicação CPOPM.
+Este diretório contém scripts PowerShell para facilitar o gerenciamento da aplicação PM Hub.
 
 ## Scripts Disponíveis
 

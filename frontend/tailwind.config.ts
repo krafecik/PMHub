@@ -78,9 +78,13 @@ const config: Config = {
       },
       keyframes: {
         ...designTokens.animations.keyframes,
+        shimmer: {
+          '100%': { transform: 'translateX(100%)' },
+        },
       },
       animation: {
         ...designTokens.animations.animation,
+        shimmer: 'shimmer 1.5s ease-in-out infinite',
       },
     },
   },

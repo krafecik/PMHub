@@ -13,6 +13,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/cpopm_ci
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:3055/v1
+      PLAYWRIGHT_BASE_URL: http://127.0.0.1:3056
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,16 +26,36 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "npm"
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+            frontend/package-lock.json
 
       - name: Install dependencies
         run: npm install
 
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+        working-directory: frontend
+
       - name: Lint
         run: npm run lint
 
-      - name: Test
+      - name: Run unit tests
         run: npm run test
+
+      - name: Run Playwright tests
+        run: npm run test:e2e
+        working-directory: frontend
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report
+          if-no-files-found: ignore
 
       - name: Build
         run: npm run build

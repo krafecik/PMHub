@@ -1,18 +1,19 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { completeAzureCallback, loginWithAzure, loginWithCredentials } from '@/lib/auth-api'
+import { loginWithCredentials } from '@/lib/auth-api'
 import { useAuthStore } from '@/store/auth-store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
-import { Building2, Lock, Mail, ArrowRight, Sparkles, Shield, CheckCircle } from 'lucide-react'
+import { Lock, Mail, ArrowRight } from 'lucide-react'
 
 const loginSchema = z.object({
   email: z.string().email('Informe um e-mail válido.'),
@@ -34,17 +35,47 @@ function LoginPageContent() {
   const searchParams = useSearchParams()
   const { user, setSession } = useAuthStore()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [isAzureLoading, setIsAzureLoading] = useState(false)
-  const [isCallbackHandled, setIsCallbackHandled] = useState(false)
+  const [isSuccessMessageVisible, setSuccessMessageVisible] = useState(false)
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    setValue,
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     mode: 'onChange',
   })
+
+  // SEGURANÇA: Remover credenciais da URL imediatamente se presentes
+  useEffect(() => {
+    const emailParam = searchParams.get('email')
+    const passwordParam = searchParams.get('password')
+
+    if (emailParam || passwordParam) {
+      // Remover credenciais da URL sem recarregar a página
+      const newSearchParams = new URLSearchParams(searchParams.toString())
+      newSearchParams.delete('email')
+      newSearchParams.delete('password')
+
+      const newUrl = newSearchParams.toString()
+        ? `${window.location.pathname}?${newSearchParams.toString()}`
+        : window.location.pathname
+
+      // Usar replaceState para não adicionar ao histórico
+      window.history.replaceState({}, '', newUrl)
+
+      // Preencher o campo de email se fornecido (mas nunca a senha)
+      if (emailParam) {
+        setValue('email', emailParam)
+      }
+
+      // Mostrar aviso de segurança
+      setErrorMessage(
+        '⚠️ Por segurança, credenciais não devem ser passadas na URL. Use o formulário de login.',
+      )
+    }
+  }, [searchParams, setValue])
 
   useEffect(() => {
     if (user) {
@@ -52,55 +83,37 @@ function LoginPageContent() {
     }
   }, [user, router])
 
+  const successMessage = useMemo(() => {
+    if (searchParams.get('registered') === 'true') {
+      return 'Conta criada com sucesso. Faça login com a sua nova senha.'
+    }
+    if (searchParams.get('passwordReset') === 'true') {
+      return 'Senha redefinida com sucesso. Entre novamente para continuar.'
+    }
+    return null
+  }, [searchParams])
+
   useEffect(() => {
-    const code = searchParams.get('code')
-    const state = searchParams.get('state')
-
-    if (!code || !state || isCallbackHandled) {
-      return
+    if (successMessage) {
+      setSuccessMessageVisible(true)
     }
-
-    setIsCallbackHandled(true)
-    setErrorMessage(null)
-
-    const params = new URLSearchParams({
-      code,
-      state,
-    })
-
-    completeAzureCallback(params)
-      .then((session) => {
-        setSession(session)
-        router.replace('/dashboard')
-      })
-      .catch(() => {
-        setErrorMessage('Não foi possível concluir o login via Azure AD.')
-      })
-  }, [searchParams, router, setSession, isCallbackHandled])
-
-  async function handleAzureLogin() {
-    try {
-      setIsAzureLoading(true)
-      setErrorMessage(null)
-      const response = await loginWithAzure()
-      window.location.href = response.authorizationUrl
-    } catch (error) {
-      setErrorMessage('Não foi possível iniciar o login via Azure AD.')
-    } finally {
-      setIsAzureLoading(false)
-    }
-  }
+  }, [successMessage])
 
   async function onSubmit(data: LoginFormValues) {
     try {
       setErrorMessage(null)
+      setSuccessMessageVisible(false)
       const session = await loginWithCredentials(data.email, data.password)
       setSession(session)
       router.replace('/dashboard')
     } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : 'Falha ao realizar login. Tente novamente.',
-      )
+      console.error('Erro no login:', error)
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Falha ao realizar login. Verifique suas credenciais e tente novamente.'
+      setErrorMessage(message)
+      setSuccessMessageVisible(false)
     }
   }
 
@@ -112,41 +125,25 @@ function LoginPageContent() {
         <div className="absolute -right-1/4 bottom-1/4 h-96 w-96 rounded-full bg-accent-100 opacity-20 blur-3xl" />
       </div>
 
-      <div className="z-10 w-full max-w-lg px-4">
+      <div className="z-10 w-full max-w-md px-4">
+        {/* Logo */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-lg">
-            <span className="text-2xl font-bold">C</span>
-          </div>
-          <h1 className="text-3xl font-bold text-text-primary">CPOPM Hub</h1>
-          <p className="mt-2 text-text-secondary">Sistema de gestão de produto para CPOs e PMs</p>
+          <Image
+            src="/PMHubLogo.png"
+            alt="PM Hub"
+            width={120}
+            height={120}
+            priority
+            className="mx-auto h-32 w-32 object-contain"
+          />
         </div>
 
         <Card variant="elevated" className="border-0 shadow-2xl">
           <CardHeader className="space-y-1 pb-6">
             <CardTitle className="text-2xl">Bem-vindo de volta</CardTitle>
-            <CardDescription>Faça login para acessar o painel de ProductOps</CardDescription>
+            <CardDescription>Faça login para continuar</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button
-              type="button"
-              onClick={handleAzureLogin}
-              disabled={isAzureLoading}
-              className="h-12 w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
-              size="lg"
-            >
-              <Building2 className="mr-2 h-5 w-5" />
-              {isAzureLoading ? 'Redirecionando...' : 'Entrar com Azure AD'}
-            </Button>
-
-            <div className="relative my-8">
-              <div className="absolute inset-0 flex items-center">
-                <Separator className="w-full" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-text-muted">ou</span>
-              </div>
-            </div>
-
             <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">
@@ -189,8 +186,14 @@ function LoginPageContent() {
               </div>
 
               {errorMessage && (
-                <div className="rounded-lg border border-error-light bg-error-light/20 p-3 text-sm text-error-dark">
+                <div className="border-error-DEFAULT bg-error-50 text-error-900 dark:bg-error-900/20 dark:border-error-800 dark:text-error-100 rounded-lg border p-3 text-sm">
                   {errorMessage}
+                </div>
+              )}
+
+              {isSuccessMessageVisible && successMessage && (
+                <div className="rounded-lg border border-success/40 bg-success/10 p-3 text-sm text-success-dark">
+                  {successMessage}
                 </div>
               )}
 
@@ -199,45 +202,34 @@ function LoginPageContent() {
                 disabled={isSubmitting}
                 className="h-11 w-full"
                 loading={isSubmitting}
+                variant="gradient"
               >
-                {isSubmitting ? 'Entrando...' : 'Entrar como administrador'}
+                {isSubmitting ? 'Entrando...' : 'Entrar'}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </form>
 
-            <div className="mt-8 rounded-lg bg-secondary-50 p-4">
-              <div className="flex items-center gap-3 text-sm">
-                <Shield className="h-5 w-5 shrink-0 text-primary-600" />
-                <p className="text-text-secondary">
-                  Login administrativo apenas para usuários autorizados. Use Azure AD para login
-                  corporativo.
-                </p>
+            <div className="mt-6 space-y-3 text-center text-sm">
+              <div>
+                <Link
+                  href="/forgot-password"
+                  className="font-medium text-primary-600 transition-colors hover:text-primary-700 hover:underline"
+                >
+                  Esqueci minha senha
+                </Link>
+              </div>
+              <div className="text-text-secondary">
+                Possui um convite?{' '}
+                <Link
+                  href="/register"
+                  className="font-medium text-primary-600 transition-colors hover:text-primary-700 hover:underline"
+                >
+                  Ative sua conta
+                </Link>
               </div>
             </div>
           </CardContent>
         </Card>
-
-        {/* Features */}
-        <div className="mt-8 grid grid-cols-3 gap-4 text-center">
-          <div className="space-y-2">
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-primary-100 text-primary-600">
-              <Sparkles className="h-5 w-5" />
-            </div>
-            <p className="text-xs font-medium text-text-secondary">Gestão Ágil</p>
-          </div>
-          <div className="space-y-2">
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-accent-100 text-accent-600">
-              <CheckCircle className="h-5 w-5" />
-            </div>
-            <p className="text-xs font-medium text-text-secondary">Validações</p>
-          </div>
-          <div className="space-y-2">
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-success-light/20 text-success-dark">
-              <Shield className="h-5 w-5" />
-            </div>
-            <p className="text-xs font-medium text-text-secondary">Segurança</p>
-          </div>
-        </div>
       </div>
     </main>
   )
@@ -251,11 +243,9 @@ function LoginPageSkeleton() {
         <div className="absolute -right-1/4 bottom-1/4 h-96 w-96 rounded-full bg-accent-100 opacity-20 blur-3xl" />
       </div>
 
-      <div className="z-10 w-full max-w-lg px-4">
+      <div className="z-10 w-full max-w-md px-4">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 h-16 w-16 animate-pulse rounded-2xl bg-secondary-200" />
-          <div className="mx-auto h-8 w-32 animate-pulse rounded-md bg-secondary-200" />
-          <div className="mx-auto mt-2 h-4 w-48 animate-pulse rounded-md bg-secondary-100" />
+          <div className="mx-auto h-32 w-32 animate-pulse rounded-lg bg-secondary-200" />
         </div>
 
         <Card variant="elevated" className="border-0 shadow-2xl">

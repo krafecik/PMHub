@@ -3,10 +3,20 @@ import { cn } from '@/lib/utils'
 
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   error?: boolean
+  minRows?: number
+  maxRows?: number
 }
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, error, ...props }, ref) => {
+  ({ className, error, minRows, maxRows, style, rows, ...props }, ref) => {
+    const baseRowHeight = 24
+    const resolvedRows = rows ?? minRows
+    const resolvedStyle = {
+      ...style,
+      ...(minRows ? { minHeight: `${minRows * baseRowHeight}px` } : {}),
+      ...(maxRows ? { maxHeight: `${maxRows * baseRowHeight}px` } : {}),
+    }
+
     return (
       <textarea
         className={cn(
@@ -15,6 +25,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           className,
         )}
         ref={ref}
+        rows={resolvedRows}
+        style={resolvedStyle}
         {...props}
       />
     )

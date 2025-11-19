@@ -1,0 +1,378 @@
+# Page snapshot
+
+```yaml
+- generic [active]:
+  - alert
+  - generic:
+    - complementary:
+      - generic:
+        - generic:
+          - img
+      - navigation:
+        - navigation:
+          - generic:
+            - generic:
+              - link:
+                - /url: /dashboard
+                - generic:
+                  - img
+                - generic: Dashboard
+          - generic:
+            - generic:
+              - link:
+                - /url: /produtos
+                - generic:
+                  - img
+                - generic: Produtos
+          - generic:
+            - generic:
+              - link:
+                - /url: /demandas
+                - generic:
+                  - img
+                - generic: Demandas
+                - generic: Novo
+          - generic:
+            - generic:
+              - link:
+                - /url: /triagem
+                - generic:
+                  - img
+                - generic: Triagem
+                - generic: "27"
+          - generic:
+            - generic:
+              - link:
+                - /url: /discovery
+                - generic:
+                  - img
+                - generic: Discovery
+                - generic: Novo
+          - generic:
+            - button:
+              - generic:
+                - img
+              - generic: Planejamento
+              - img
+            - generic:
+              - generic:
+                - link:
+                  - /url: /planejamento
+                  - generic:
+                    - img
+                  - generic: Dashboard
+              - generic:
+                - link:
+                  - /url: /planejamento/planning-trimestral
+                  - generic:
+                    - img
+                  - generic: Planning Trimestral
+              - generic:
+                - link:
+                  - /url: /planejamento/epicos
+                  - generic:
+                    - img
+                  - generic: Épicos
+              - generic:
+                - link:
+                  - /url: /planejamento/features
+                  - generic:
+                    - img
+                  - generic: Features
+              - generic:
+                - link:
+                  - /url: /planejamento/dependencias
+                  - generic:
+                    - img
+                  - generic: Dependências
+              - generic:
+                - link:
+                  - /url: /planejamento/roadmap
+                  - generic:
+                    - img
+                  - generic: Roadmap Timeline
+              - generic:
+                - link:
+                  - /url: /planejamento/simulador
+                  - generic:
+                    - img
+                  - generic: Simulador de Cenários
+              - generic:
+                - link:
+                  - /url: /planejamento/compromissos
+                  - generic:
+                    - img
+                  - generic: Compromissos Trimestrais
+              - generic:
+                - link:
+                  - /url: /planejamento/capacidade
+                  - generic:
+                    - img
+                  - generic: Capacidade por Squad
+              - generic:
+                - link:
+                  - /url: /planejamento/configuracao
+                  - generic:
+                    - img
+                  - generic: Configuração
+          - generic:
+            - button:
+              - generic:
+                - img
+              - generic: Documentação
+              - img
+            - generic:
+              - generic:
+                - link:
+                  - /url: /documentacao
+                  - generic:
+                    - img
+                  - generic: Biblioteca
+              - generic:
+                - link:
+                  - /url: /documentacao/novo
+                  - generic:
+                    - img
+                  - generic: Novo Documento
+              - button [disabled]:
+                - generic:
+                  - img
+                - generic: Release Notes
+                - generic: Em breve
+          - generic:
+            - button [disabled]:
+              - generic:
+                - img
+              - generic: Validação
+              - img
+            - generic:
+              - button [disabled]:
+                - generic:
+                  - img
+                - generic: Go-to-Market
+              - button [disabled]:
+                - generic:
+                  - img
+                - generic: Checklists
+          - generic:
+            - button [disabled]:
+              - generic:
+                - img
+              - generic: Métricas
+              - img
+            - generic:
+              - button [disabled]:
+                - generic:
+                  - img
+                - generic: KPIs
+              - button [disabled]:
+                - generic:
+                  - img
+                - generic: Health Score
+          - generic:
+            - button [disabled]:
+              - generic:
+                - img
+              - generic: Governança
+          - generic:
+            - link:
+              - /url: /settings/tenant
+              - generic:
+                - img
+              - generic: Configurações do Tenant
+          - generic:
+            - link:
+              - /url: /settings/catalogos
+              - generic:
+                - img
+              - generic: Catálogos flexíveis
+          - generic:
+            - link:
+              - /url: /settings/usuarios
+              - generic:
+                - img
+              - generic: Usuários & acessos
+      - generic:
+        - generic:
+          - generic: v0.1 • MVP
+      - generic:
+        - button:
+          - img
+    - generic:
+      - banner:
+        - generic:
+          - generic:
+            - img
+            - generic: Buscar...
+            - generic:
+              - img
+              - text: K
+        - generic:
+          - button:
+            - img
+            - generic: Tenant Demo
+            - img
+          - button:
+            - img
+            - generic: Alternar tema
+          - button:
+            - img
+          - generic:
+            - generic:
+              - generic: PM de Teste
+              - generic: pm@example.com
+            - generic:
+              - generic: PD
+            - button:
+              - img
+      - main:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - heading [level=1]: Produtos
+                  - paragraph: Gerencie os produtos vinculados ao tenant atual
+                - generic:
+                  - button:
+                    - img
+                  - button:
+                    - img
+                    - text: Novo Produto
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - paragraph: Total de Produtos
+                        - paragraph: "2"
+                      - generic:
+                        - img
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - paragraph: Produtos Ativos
+                        - paragraph: "2"
+                      - generic:
+                        - img
+                    - generic:
+                      - img
+                      - generic: +5%
+                      - generic: vs. mês anterior
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - paragraph: Produtos Inativos
+                        - paragraph: "0"
+                      - generic:
+                        - img
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - paragraph: Saúde Média
+                        - paragraph: 85%
+                      - generic:
+                        - img
+                    - generic:
+                      - img
+                      - generic: +3%
+                      - generic: vs. mês anterior
+              - generic:
+                - generic:
+                  - generic:
+                    - img
+                    - textbox:
+                      - /placeholder: Buscar produtos por nome ou descrição...
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - img
+                            - generic:
+                              - heading [level=3]: Plataforma Atlas
+                              - generic:
+                                - img
+                                - text: Ativo
+                          - button:
+                            - img
+                        - paragraph: Plataforma modular para gestão de operações.
+                        - generic:
+                          - generic:
+                            - generic:
+                              - img
+                            - paragraph: "23"
+                            - paragraph: Demandas
+                          - generic:
+                            - generic:
+                              - img
+                            - paragraph: "7"
+                            - paragraph: Ativas
+                          - generic:
+                            - generic:
+                              - img
+                            - paragraph: 76%
+                            - paragraph: Saúde
+                        - generic:
+                          - img
+                          - generic:
+                            - generic: 76%
+                            - generic: Score
+                        - generic:
+                          - paragraph: Atualizado agora mesmo
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - img
+                            - generic:
+                              - heading [level=3]: CRM Next
+                              - generic:
+                                - img
+                                - text: Ativo
+                          - button:
+                            - img
+                        - paragraph: Descrição padrão do produto.
+                        - generic:
+                          - generic:
+                            - generic:
+                              - img
+                            - paragraph: "11"
+                            - paragraph: Demandas
+                          - generic:
+                            - generic:
+                              - img
+                            - paragraph: "13"
+                            - paragraph: Ativas
+                          - generic:
+                            - generic:
+                              - img
+                            - paragraph: 87%
+                            - paragraph: Saúde
+                        - generic:
+                          - img
+                          - generic:
+                            - generic: 87%
+                            - generic: Score
+                        - generic:
+                          - paragraph: Atualizado agora mesmo
+            - generic:
+              - button:
+                - img
+  - menu "Ações do produto CRM Next" [ref=e1]:
+    - menuitem "Editar produto" [ref=e2] [cursor=pointer]:
+      - img [ref=e3]
+      - text: Editar produto
+    - separator [ref=e6]
+    - menuitem "Remover produto" [ref=e7] [cursor=pointer]:
+      - img [ref=e8]
+      - text: Remover produto
+```

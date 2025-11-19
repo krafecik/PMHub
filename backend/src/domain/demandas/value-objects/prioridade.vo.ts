@@ -1,64 +1,77 @@
-export enum Prioridade {
-  BAIXA = 'BAIXA',
-  MEDIA = 'MEDIA',
-  ALTA = 'ALTA',
-  CRITICA = 'CRITICA',
-}
+import { CatalogItemProps, CatalogItemVO } from '@domain/shared/value-objects/catalog-item.vo';
+
+const CATALOG_CATEGORY = 'prioridade_nivel';
+
+const DEFAULT_WEIGHTS: Record<string, number> = {
+  baixa: 1,
+  media: 2,
+  alta: 3,
+  critica: 4,
+};
+
+const DEFAULT_COLORS: Record<string, string> = {
+  baixa: 'blue',
+  media: 'yellow',
+  alta: 'orange',
+  critica: 'red',
+};
 
 export class PrioridadeVO {
-  private constructor(private readonly value: Prioridade) {}
+  private constructor(private readonly catalogItem: CatalogItemVO) {}
 
-  static create(value: string): PrioridadeVO {
-    if (!Object.values(Prioridade).includes(value as Prioridade)) {
-      throw new Error(`Prioridade inválida: ${value}`);
+  static fromCatalogItem(item: CatalogItemVO): PrioridadeVO {
+    item.ensureCategory(CATALOG_CATEGORY);
+    return new PrioridadeVO(item);
+  }
+
+  static create(props: CatalogItemProps): PrioridadeVO {
+    const item = CatalogItemVO.create(props);
+    return PrioridadeVO.fromCatalogItem(item);
+  }
+
+  static default(prioridadeCatalog?: CatalogItemVO): PrioridadeVO {
+    if (prioridadeCatalog) {
+      return PrioridadeVO.fromCatalogItem(prioridadeCatalog);
     }
-    return new PrioridadeVO(value as Prioridade);
+    throw new Error('Prioridade padrão requer item de catálogo explicitado');
   }
 
-  static fromEnum(value: Prioridade): PrioridadeVO {
-    return new PrioridadeVO(value);
+  get id(): string {
+    return this.catalogItem.id;
   }
 
-  static default(): PrioridadeVO {
-    return new PrioridadeVO(Prioridade.MEDIA);
+  get slug(): string {
+    return this.catalogItem.slug;
   }
 
-  getValue(): Prioridade {
-    return this.value;
+  get label(): string {
+    return this.catalogItem.label;
   }
 
-  getLabel(): string {
-    const labels = {
-      [Prioridade.BAIXA]: 'Baixa',
-      [Prioridade.MEDIA]: 'Média',
-      [Prioridade.ALTA]: 'Alta',
-      [Prioridade.CRITICA]: 'Crítica',
-    };
-    return labels[this.value];
+  private get metadata(): Record<string, unknown> | null | undefined {
+    return this.catalogItem.metadata;
   }
 
   getColor(): string {
-    const colors = {
-      [Prioridade.BAIXA]: 'blue',
-      [Prioridade.MEDIA]: 'yellow',
-      [Prioridade.ALTA]: 'orange',
-      [Prioridade.CRITICA]: 'red',
-    };
-    return colors[this.value];
+    const metaColor = this.metadata && (this.metadata['color'] as string | undefined);
+    return metaColor ?? DEFAULT_COLORS[this.slug] ?? 'gray';
+  }
+
+  getValue(): string {
+    return this.catalogItem.getLegacyValue();
+  }
+
+  getLabel(): string {
+    return this.label;
   }
 
   getNumericValue(): number {
-    const values = {
-      [Prioridade.BAIXA]: 1,
-      [Prioridade.MEDIA]: 2,
-      [Prioridade.ALTA]: 3,
-      [Prioridade.CRITICA]: 4,
-    };
-    return values[this.value];
+    const metaWeight = this.metadata && (this.metadata['weight'] as number | undefined);
+    return metaWeight ?? DEFAULT_WEIGHTS[this.slug] ?? 1;
   }
 
   isHighPriority(): boolean {
-    return [Prioridade.ALTA, Prioridade.CRITICA].includes(this.value);
+    return this.getNumericValue() >= 3;
   }
 
   compareTo(other: PrioridadeVO): number {
@@ -66,10 +79,16 @@ export class PrioridadeVO {
   }
 
   equals(other: PrioridadeVO): boolean {
-    return this.value === other.value;
+    return this.catalogItem.equals(other.catalogItem);
   }
 
-  toString(): string {
-    return this.value;
+  toCatalogItem(): CatalogItemVO {
+    return this.catalogItem;
+  }
+
+  toJSON(): CatalogItemProps {
+    return this.catalogItem.toJSON();
   }
 }
+
+export type Prioridade = string;

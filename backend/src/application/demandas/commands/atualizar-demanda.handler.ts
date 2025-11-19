@@ -12,24 +12,29 @@ import {
   IDemandaRepository,
   DEMANDA_REPOSITORY_TOKEN,
 } from '@infra/repositories/demandas/demanda.repository.interface';
+import {
+  CATALOGO_REPOSITORY_TOKEN,
+  ICatalogoRepository,
+} from '@domain/catalog/catalog.repository.interface';
+import { CatalogCategorySlugs } from '@domain/catalog/catalog.constants';
 
 @CommandHandler(AtualizarDemandaCommand)
 export class AtualizarDemandaHandler implements ICommandHandler<AtualizarDemandaCommand> {
   constructor(
     @Inject(DEMANDA_REPOSITORY_TOKEN)
     private readonly demandaRepository: IDemandaRepository,
+    @Inject(CATALOGO_REPOSITORY_TOKEN)
+    private readonly catalogoRepository: ICatalogoRepository,
   ) {}
 
   async execute(command: AtualizarDemandaCommand): Promise<void> {
     const { tenantId, demandaId, ...updates } = command;
 
-    // Buscar demanda existente
     const demanda = await this.demandaRepository.findById(tenantId, demandaId);
     if (!demanda) {
       throw new NotFoundException('Demanda não encontrada');
     }
 
-    // Aplicar atualizações
     if (updates.titulo !== undefined) {
       demanda.atualizarTitulo(TituloVO.create(updates.titulo));
     }
@@ -38,8 +43,33 @@ export class AtualizarDemandaHandler implements ICommandHandler<AtualizarDemanda
       demanda.atualizarDescricao(updates.descricao);
     }
 
+    if (updates.tipo !== undefined) {
+      const tipoItem = await this.catalogoRepository.getRequiredItem({
+        tenantId,
+        category: CatalogCategorySlugs.TIPO_DEMANDA,
+        legacyValue: updates.tipo,
+      });
+      demanda.alterarTipo(TipoDemandaVO.fromCatalogItem(tipoItem));
+    }
+
+    if (updates.origem !== undefined) {
+      const origemItem = await this.catalogoRepository.getRequiredItem({
+        tenantId,
+        category: CatalogCategorySlugs.ORIGEM_DEMANDA,
+        legacyValue: updates.origem,
+      });
+      demanda.alterarOrigem(OrigemDemandaVO.fromCatalogItem(origemItem), updates.origemDetalhe);
+    } else if (updates.origemDetalhe !== undefined) {
+      demanda.alterarOrigem(demanda.origem, updates.origemDetalhe);
+    }
+
     if (updates.prioridade !== undefined) {
-      demanda.alterarPrioridade(PrioridadeVO.create(updates.prioridade));
+      const prioridadeItem = await this.catalogoRepository.getRequiredItem({
+        tenantId,
+        category: CatalogCategorySlugs.PRIORIDADE_NIVEL,
+        legacyValue: updates.prioridade,
+      });
+      demanda.alterarPrioridade(PrioridadeVO.fromCatalogItem(prioridadeItem));
     }
 
     if (updates.responsavelId !== undefined) {
@@ -51,10 +81,14 @@ export class AtualizarDemandaHandler implements ICommandHandler<AtualizarDemanda
     }
 
     if (updates.status !== undefined) {
-      demanda.alterarStatus(StatusDemandaVO.create(updates.status));
+      const statusItem = await this.catalogoRepository.getRequiredItem({
+        tenantId,
+        category: CatalogCategorySlugs.STATUS_DEMANDA,
+        legacyValue: updates.status,
+      });
+      demanda.alterarStatus(StatusDemandaVO.fromCatalogItem(statusItem));
     }
 
-    // Salvar alterações
     await this.demandaRepository.update(demanda);
   }
 }

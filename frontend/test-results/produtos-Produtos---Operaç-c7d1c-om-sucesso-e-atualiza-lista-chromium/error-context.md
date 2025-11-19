@@ -1,0 +1,307 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - img "PM Hub Logo" [ref=e7]
+      - navigation [ref=e8]:
+        - navigation [ref=e9]:
+          - link "Dashboard" [ref=e12] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e14]
+            - generic [ref=e19]: Dashboard
+          - link "Produtos" [ref=e22] [cursor=pointer]:
+            - /url: /produtos
+            - img [ref=e24]
+            - generic [ref=e26]: Produtos
+          - link "Demandas Novo" [ref=e29] [cursor=pointer]:
+            - /url: /demandas
+            - img [ref=e31]
+            - generic [ref=e34]: Demandas
+            - generic [ref=e35]: Novo
+          - link "Triagem 27" [ref=e38] [cursor=pointer]:
+            - /url: /triagem
+            - img [ref=e40]
+            - generic [ref=e42]: Triagem
+            - generic [ref=e43]: "27"
+          - link "Discovery Novo" [ref=e46] [cursor=pointer]:
+            - /url: /discovery
+            - img [ref=e48]
+            - generic [ref=e50]: Discovery
+            - generic [ref=e51]: Novo
+          - generic [ref=e52]:
+            - button "Planejamento" [ref=e53] [cursor=pointer]:
+              - img [ref=e55]
+              - generic [ref=e57]: Planejamento
+              - img [ref=e58]
+            - generic [ref=e60]:
+              - link "Dashboard" [ref=e62] [cursor=pointer]:
+                - /url: /planejamento
+                - img [ref=e64]
+                - generic [ref=e69]: Dashboard
+              - link "Planning Trimestral" [ref=e71] [cursor=pointer]:
+                - /url: /planejamento/planning-trimestral
+                - img [ref=e73]
+                - generic [ref=e75]: Planning Trimestral
+              - link "Épicos" [ref=e77] [cursor=pointer]:
+                - /url: /planejamento/epicos
+                - img [ref=e79]
+                - generic [ref=e83]: Épicos
+              - link "Features" [ref=e85] [cursor=pointer]:
+                - /url: /planejamento/features
+                - img [ref=e87]
+                - generic [ref=e97]: Features
+              - link "Dependências" [ref=e99] [cursor=pointer]:
+                - /url: /planejamento/dependencias
+                - img [ref=e101]
+                - generic [ref=e105]: Dependências
+              - link "Roadmap Timeline" [ref=e107] [cursor=pointer]:
+                - /url: /planejamento/roadmap
+                - img [ref=e109]
+                - generic [ref=e111]: Roadmap Timeline
+              - link "Simulador de Cenários" [ref=e113] [cursor=pointer]:
+                - /url: /planejamento/simulador
+                - img [ref=e115]
+                - generic [ref=e116]: Simulador de Cenários
+              - link "Compromissos Trimestrais" [ref=e118] [cursor=pointer]:
+                - /url: /planejamento/compromissos
+                - img [ref=e120]
+                - generic [ref=e124]: Compromissos Trimestrais
+              - link "Capacidade por Squad" [ref=e126] [cursor=pointer]:
+                - /url: /planejamento/capacidade
+                - img [ref=e128]
+                - generic [ref=e130]: Capacidade por Squad
+              - link "Configuração" [ref=e132] [cursor=pointer]:
+                - /url: /planejamento/configuracao
+                - img [ref=e134]
+                - generic [ref=e137]: Configuração
+          - generic [ref=e138]:
+            - button "Documentação" [ref=e139] [cursor=pointer]:
+              - img [ref=e141]
+              - generic [ref=e143]: Documentação
+              - img [ref=e144]
+            - generic [ref=e146]:
+              - link "Biblioteca" [ref=e148] [cursor=pointer]:
+                - /url: /documentacao
+                - img [ref=e150]
+                - generic [ref=e152]: Biblioteca
+              - link "Novo Documento" [ref=e154] [cursor=pointer]:
+                - /url: /documentacao/novo
+                - img [ref=e156]
+                - generic [ref=e159]: Novo Documento
+              - button "Release Notes Em breve" [disabled] [ref=e160]:
+                - img [ref=e162]
+                - generic [ref=e166]: Release Notes
+                - generic [ref=e167]: Em breve
+          - generic [ref=e168]:
+            - button "Validação" [disabled] [ref=e169]:
+              - img [ref=e171]
+              - generic [ref=e176]: Validação
+              - img [ref=e177]
+            - generic [ref=e179]:
+              - button "Go-to-Market" [disabled] [ref=e180]:
+                - img [ref=e182]
+                - generic [ref=e187]: Go-to-Market
+              - button "Checklists" [disabled] [ref=e188]:
+                - img [ref=e190]
+                - generic [ref=e193]: Checklists
+          - generic [ref=e194]:
+            - button "Métricas" [disabled] [ref=e195]:
+              - img [ref=e197]
+              - generic [ref=e200]: Métricas
+              - img [ref=e201]
+            - generic [ref=e203]:
+              - button "KPIs" [disabled] [ref=e204]:
+                - img [ref=e206]
+                - generic [ref=e208]: KPIs
+              - button "Health Score" [disabled] [ref=e209]:
+                - img [ref=e211]
+                - generic [ref=e213]: Health Score
+          - button "Governança" [disabled] [ref=e215]:
+            - img [ref=e217]
+            - generic [ref=e222]: Governança
+          - link "Configurações do Tenant" [ref=e224] [cursor=pointer]:
+            - /url: /settings/tenant
+            - img [ref=e226]
+            - generic [ref=e229]: Configurações do Tenant
+          - link "Catálogos flexíveis" [ref=e231] [cursor=pointer]:
+            - /url: /settings/catalogos
+            - img [ref=e233]
+            - generic [ref=e236]: Catálogos flexíveis
+          - link "Usuários & acessos" [ref=e238] [cursor=pointer]:
+            - /url: /settings/usuarios
+            - img [ref=e240]
+            - generic [ref=e245]: Usuários & acessos
+      - generic [ref=e249]: v0.1 • MVP
+      - button [ref=e251] [cursor=pointer]:
+        - img [ref=e252]
+    - generic [ref=e253]:
+      - banner [ref=e254]:
+        - generic [ref=e256]:
+          - img [ref=e257]
+          - generic [ref=e260]: Buscar...
+          - generic [ref=e261]:
+            - img [ref=e262]
+            - text: K
+        - generic [ref=e264]:
+          - button "Tenant Demo" [ref=e265] [cursor=pointer]:
+            - img [ref=e266]
+            - generic [ref=e270]: Tenant Demo
+            - img [ref=e271]
+          - button "Alternar tema" [ref=e273] [cursor=pointer]:
+            - img [ref=e274]
+            - generic [ref=e280]: Alternar tema
+          - button [ref=e281] [cursor=pointer]:
+            - img [ref=e282]
+          - generic [ref=e286]:
+            - generic [ref=e287]:
+              - generic [ref=e288]: PM de Teste
+              - generic [ref=e289]: pm@example.com
+            - generic [ref=e291]: PD
+            - button [ref=e292] [cursor=pointer]:
+              - img [ref=e293]
+      - main [ref=e296]:
+        - generic [ref=e298]:
+          - generic [ref=e299]:
+            - generic [ref=e300]:
+              - generic [ref=e301]:
+                - heading "Produtos" [level=1] [ref=e302]
+                - paragraph [ref=e303]: Gerencie os produtos vinculados ao tenant atual
+              - generic [ref=e304]:
+                - button "Ajuda" [ref=e305] [cursor=pointer]:
+                  - img [ref=e306]
+                - button "Novo Produto" [ref=e309] [cursor=pointer]:
+                  - img [ref=e310]
+                  - text: Novo Produto
+            - generic [ref=e311]:
+              - generic [ref=e316]:
+                - generic [ref=e317]:
+                  - paragraph [ref=e318]: Total de Produtos
+                  - paragraph [ref=e319]: "3"
+                - img [ref=e321]
+              - generic [ref=e326]:
+                - generic [ref=e327]:
+                  - generic [ref=e328]:
+                    - paragraph [ref=e329]: Produtos Ativos
+                    - paragraph [ref=e330]: "2"
+                  - img [ref=e332]
+                - generic [ref=e335]:
+                  - img [ref=e336]
+                  - generic [ref=e338]: +5%
+                  - generic [ref=e339]: vs. mês anterior
+              - generic [ref=e344]:
+                - generic [ref=e345]:
+                  - paragraph [ref=e346]: Produtos Inativos
+                  - paragraph [ref=e347]: "1"
+                - img [ref=e349]
+              - generic [ref=e356]:
+                - generic [ref=e357]:
+                  - generic [ref=e358]:
+                    - paragraph [ref=e359]: Saúde Média
+                    - paragraph [ref=e360]: 85%
+                  - img [ref=e362]
+                - generic [ref=e364]:
+                  - img [ref=e365]
+                  - generic [ref=e367]: +3%
+                  - generic [ref=e368]: vs. mês anterior
+            - generic [ref=e371]:
+              - img [ref=e372]
+              - textbox "Buscar produtos por nome ou descrição..." [ref=e375]
+            - generic [ref=e377]:
+              - generic [ref=e382] [cursor=pointer]:
+                - generic [ref=e383]:
+                  - generic [ref=e384]:
+                    - img [ref=e386]
+                    - generic [ref=e388]:
+                      - heading "Data Lake Insights" [level=3] [ref=e389]
+                      - generic [ref=e390]:
+                        - img [ref=e391]
+                        - text: Ativo
+                  - button "Ações do produto Data Lake Insights" [ref=e394]:
+                    - img [ref=e395]
+                - generic [ref=e399]:
+                  - generic [ref=e400]:
+                    - img [ref=e402]
+                    - paragraph [ref=e405]: "22"
+                    - paragraph [ref=e406]: Demandas
+                  - generic [ref=e407]:
+                    - img [ref=e409]
+                    - paragraph [ref=e411]: "14"
+                    - paragraph [ref=e412]: Ativas
+                  - generic [ref=e413]:
+                    - img [ref=e415]
+                    - paragraph [ref=e418]: 78%
+                    - paragraph [ref=e419]: Saúde
+                - generic [ref=e420]:
+                  - img [ref=e421]
+                  - generic [ref=e424]:
+                    - generic [ref=e425]: 78%
+                    - generic [ref=e426]: Score
+                - paragraph [ref=e428]: Atualizado agora mesmo
+              - generic [ref=e433] [cursor=pointer]:
+                - generic [ref=e434]:
+                  - generic [ref=e435]:
+                    - img [ref=e437]
+                    - generic [ref=e439]:
+                      - heading "Plataforma Atlas" [level=3] [ref=e440]
+                      - generic [ref=e441]:
+                        - img [ref=e442]
+                        - text: Ativo
+                  - button "Ações do produto Plataforma Atlas" [ref=e445]:
+                    - img [ref=e446]
+                - paragraph [ref=e450]: Plataforma modular para gestão de operações.
+                - generic [ref=e451]:
+                  - generic [ref=e452]:
+                    - img [ref=e454]
+                    - paragraph [ref=e457]: "36"
+                    - paragraph [ref=e458]: Demandas
+                  - generic [ref=e459]:
+                    - img [ref=e461]
+                    - paragraph [ref=e463]: "4"
+                    - paragraph [ref=e464]: Ativas
+                  - generic [ref=e465]:
+                    - img [ref=e467]
+                    - paragraph [ref=e470]: 97%
+                    - paragraph [ref=e471]: Saúde
+                - generic [ref=e472]:
+                  - img [ref=e473]
+                  - generic [ref=e476]:
+                    - generic [ref=e477]: 97%
+                    - generic [ref=e478]: Score
+                - paragraph [ref=e480]: Atualizado agora mesmo
+              - generic [ref=e485] [cursor=pointer]:
+                - generic [ref=e486]:
+                  - generic [ref=e487]:
+                    - img [ref=e489]
+                    - generic [ref=e491]:
+                      - heading "CRM Legacy" [level=3] [ref=e492]
+                      - generic [ref=e493]:
+                        - img [ref=e494]
+                        - text: Inativo
+                  - button "Ações do produto CRM Legacy" [ref=e498]:
+                    - img [ref=e499]
+                - paragraph [ref=e503]: Produto legado em fase de sunset.
+                - generic [ref=e504]:
+                  - generic [ref=e505]:
+                    - img [ref=e507]
+                    - paragraph [ref=e510]: "40"
+                    - paragraph [ref=e511]: Demandas
+                  - generic [ref=e512]:
+                    - img [ref=e514]
+                    - paragraph [ref=e516]: "19"
+                    - paragraph [ref=e517]: Ativas
+                  - generic [ref=e518]:
+                    - img [ref=e520]
+                    - paragraph [ref=e523]: 86%
+                    - paragraph [ref=e524]: Saúde
+                - generic [ref=e525]:
+                  - img [ref=e526]
+                  - generic [ref=e529]:
+                    - generic [ref=e530]: 86%
+                    - generic [ref=e531]: Score
+                - paragraph [ref=e533]: Atualizado agora mesmo
+          - button [ref=e535] [cursor=pointer]:
+            - img [ref=e536]
+```

@@ -1,9 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { JwtAccessPayload } from '../jwt-token.service';
 
 @Injectable()
@@ -15,8 +10,8 @@ export class TenantGuard implements CanActivate {
       typeof tenantIdHeader === 'string'
         ? tenantIdHeader
         : Array.isArray(tenantIdHeader)
-        ? tenantIdHeader[0]
-        : undefined;
+          ? tenantIdHeader[0]
+          : undefined;
 
     if (!tenantId) {
       throw new ForbiddenException('Cabeçalho X-Tenant-Id é obrigatório.');
@@ -38,4 +33,3 @@ export class TenantGuard implements CanActivate {
     return true;
   }
 }
-

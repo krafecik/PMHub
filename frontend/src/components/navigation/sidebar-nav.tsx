@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   Package2,
   Calendar,
-  Search,
   CheckCircle2,
   BarChart3,
   Shield,
@@ -16,13 +15,21 @@ import {
   ChevronRight,
   Sparkles,
   Inbox,
-  Lightbulb,
   FlaskConical,
   Map,
   BookOpen,
   Rocket,
   TrendingUp,
   Users,
+  Filter,
+  Layers,
+  Boxes,
+  GitBranch,
+  Activity,
+  Sliders,
+  FileCheck,
+  FileText,
+  FileDown,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -55,29 +62,90 @@ const navigationItems: NavigationItem[] = [
     badge: 'Novo',
   },
   {
+    label: 'Triagem',
+    href: '/triagem',
+    icon: <Filter className="h-5 w-5" />,
+    badge: 27,
+  },
+  {
     label: 'Discovery',
+    href: '/discovery',
     icon: <FlaskConical className="h-5 w-5" />,
-    disabled: true,
-    children: [
-      { label: 'Problemas', icon: <Lightbulb className="h-4 w-4" />, disabled: true },
-      { label: 'Hipóteses', icon: <Search className="h-4 w-4" />, disabled: true },
-      { label: 'Experimentos', icon: <FlaskConical className="h-4 w-4" />, disabled: true },
-    ],
+    badge: 'Novo',
   },
   {
     label: 'Planejamento',
     icon: <Map className="h-5 w-5" />,
-    disabled: true,
     children: [
-      { label: 'Roadmap', icon: <Calendar className="h-4 w-4" />, disabled: true },
-      { label: 'Épicos', icon: <Package2 className="h-4 w-4" />, disabled: true },
-      { label: 'Features', icon: <Sparkles className="h-4 w-4" />, disabled: true },
+      { label: 'Dashboard', href: '/planejamento', icon: <LayoutDashboard className="h-4 w-4" /> },
+      {
+        label: 'Planning Trimestral',
+        href: '/planejamento/planning-trimestral',
+        icon: <Calendar className="h-4 w-4" />,
+      },
+      {
+        label: 'Épicos',
+        href: '/planejamento/epicos',
+        icon: <Layers className="h-4 w-4" />,
+      },
+      {
+        label: 'Features',
+        href: '/planejamento/features',
+        icon: <Boxes className="h-4 w-4" />,
+      },
+      {
+        label: 'Dependências',
+        href: '/planejamento/dependencias',
+        icon: <GitBranch className="h-4 w-4" />,
+      },
+      {
+        label: 'Roadmap Timeline',
+        href: '/planejamento/roadmap',
+        icon: <Activity className="h-4 w-4" />,
+      },
+      {
+        label: 'Simulador de Cenários',
+        href: '/planejamento/simulador',
+        icon: <Sliders className="h-4 w-4" />,
+      },
+      {
+        label: 'Compromissos Trimestrais',
+        href: '/planejamento/compromissos',
+        icon: <FileCheck className="h-4 w-4" />,
+      },
+      {
+        label: 'Capacidade por Squad',
+        href: '/planejamento/capacidade',
+        icon: <BarChart3 className="h-4 w-4" />,
+      },
+      {
+        label: 'Configuração',
+        href: '/planejamento/configuracao',
+        icon: <Settings className="h-4 w-4" />,
+      },
     ],
   },
   {
     label: 'Documentação',
     icon: <BookOpen className="h-5 w-5" />,
-    disabled: true,
+    children: [
+      {
+        label: 'Biblioteca',
+        href: '/documentacao',
+        icon: <BookOpen className="h-4 w-4" />,
+      },
+      {
+        label: 'Novo Documento',
+        href: '/documentacao/novo',
+        icon: <FileText className="h-4 w-4" />,
+      },
+      {
+        label: 'Release Notes',
+        icon: <FileDown className="h-4 w-4" />,
+        disabled: true,
+        badge: 'Em breve',
+      },
+    ],
   },
   {
     label: 'Validação',
@@ -109,6 +177,16 @@ const settingsItems: NavigationItem[] = [
     label: 'Configurações do Tenant',
     href: '/settings/tenant',
     icon: <Settings className="h-5 w-5" />,
+  },
+  {
+    label: 'Catálogos flexíveis',
+    href: '/settings/catalogos',
+    icon: <Sparkles className="h-5 w-5" />,
+  },
+  {
+    label: 'Usuários & acessos',
+    href: '/settings/usuarios',
+    icon: <Users className="h-5 w-5" />,
   },
 ]
 

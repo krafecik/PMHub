@@ -2,8 +2,14 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject, NotFoundException } from '@nestjs/common';
 import { AdicionarAnexoCommand } from './adicionar-anexo.command';
 import { StorageService } from '@infra/storage/storage.service';
-import { IDemandaRepository, DEMANDA_REPOSITORY_TOKEN } from '@infra/repositories/demandas/demanda.repository.interface';
-import { IAnexoRepository, ANEXO_REPOSITORY_TOKEN } from '@infra/repositories/demandas/anexo.repository.interface';
+import {
+  IDemandaRepository,
+  DEMANDA_REPOSITORY_TOKEN,
+} from '@infra/repositories/demandas/demanda.repository.interface';
+import {
+  IAnexoRepository,
+  ANEXO_REPOSITORY_TOKEN,
+} from '@infra/repositories/demandas/anexo.repository.interface';
 
 export interface AnexoCriado {
   id: string;
@@ -33,11 +39,7 @@ export class AdicionarAnexoHandler implements ICommandHandler<AdicionarAnexoComm
     }
 
     // Fazer upload do arquivo
-    const uploadResult = await this.storageService.uploadFile(
-      arquivo,
-      tenantId,
-      usuarioId,
-    );
+    const uploadResult = await this.storageService.uploadFile(arquivo, tenantId, usuarioId);
 
     // Salvar referência no banco
     const anexoId = await this.anexoRepository.save({

@@ -10,5 +10,8 @@ export class CriarDemandaRapidaCommand implements ICommand {
     public readonly descricao?: string,
     public readonly origem?: string,
     public readonly origemDetalhe?: string,
+    public readonly prioridade?: string,
+    public readonly status?: string,
+    public readonly responsavelId?: string,
   ) {}
 }

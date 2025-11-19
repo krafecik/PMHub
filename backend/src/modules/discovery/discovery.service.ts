@@ -5,8 +5,7 @@ export class DiscoveryService {
   getStatus() {
     return {
       module: 'discovery',
-      ready: false
+      ready: false,
     };
   }
 }
-

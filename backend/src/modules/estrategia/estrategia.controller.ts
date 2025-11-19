@@ -12,4 +12,3 @@ export class EstrategiaController {
     return this.service.getStatus();
   }
 }
-

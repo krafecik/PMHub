@@ -4,7 +4,6 @@ import {
   PrioridadeVO,
   StatusDemandaVO,
   TituloVO,
-  StatusDemanda,
 } from '../value-objects';
 
 export interface DemandaProps {
@@ -20,6 +19,7 @@ export interface DemandaProps {
   prioridade: PrioridadeVO;
   status: StatusDemandaVO;
   criadoPorId: string;
+  motivoCancelamento?: string;
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date | null;
@@ -32,10 +32,9 @@ export class Demanda {
     this.props = props;
   }
 
-  static create(props: Omit<DemandaProps, 'status' | 'createdAt' | 'updatedAt'>): Demanda {
+  static create(props: Omit<DemandaProps, 'createdAt' | 'updatedAt'>): Demanda {
     return new Demanda({
       ...props,
-      status: StatusDemandaVO.novo(),
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -106,6 +105,10 @@ export class Demanda {
     return this.props.deletedAt;
   }
 
+  get motivoCancelamento(): string | undefined {
+    return this.props.motivoCancelamento;
+  }
+
   // Business methods
   atualizarTitulo(titulo: TituloVO): void {
     if (!this.props.status.isEditable()) {
@@ -128,6 +131,17 @@ export class Demanda {
     this.touch();
   }
 
+  alterarTipo(tipo: TipoDemandaVO): void {
+    this.props.tipo = tipo;
+    this.touch();
+  }
+
+  alterarOrigem(origem: OrigemDemandaVO, detalhe?: string): void {
+    this.props.origem = origem;
+    this.props.origemDetalhe = detalhe ?? this.props.origemDetalhe;
+    this.touch();
+  }
+
   atribuirResponsavel(responsavelId: string): void {
     this.props.responsavelId = responsavelId;
     this.touch();
@@ -141,19 +155,28 @@ export class Demanda {
   alterarStatus(novoStatus: StatusDemandaVO): void {
     if (!this.props.status.canTransitionTo(novoStatus)) {
       throw new Error(
-        `Não é possível transicionar de ${this.props.status.getLabel()} para ${novoStatus.getLabel()}`
+        `Não é possível transicionar de ${this.props.status.label} para ${novoStatus.label}`,
       );
     }
     this.props.status = novoStatus;
     this.touch();
   }
 
-  arquivar(): void {
-    this.alterarStatus(StatusDemandaVO.fromEnum(StatusDemanda.ARQUIVADO));
+  arquivar(statusArquivado: StatusDemandaVO): void {
+    this.alterarStatus(statusArquivado);
   }
 
-  marcarParaTriagem(): void {
-    this.alterarStatus(StatusDemandaVO.fromEnum(StatusDemanda.TRIAGEM));
+  marcarParaTriagem(statusTriagem: StatusDemandaVO): void {
+    this.alterarStatus(statusTriagem);
+  }
+
+  cancelar(statusCancelado: StatusDemandaVO, motivoCancelamento: string): void {
+    if (!motivoCancelamento || motivoCancelamento.trim().length === 0) {
+      throw new Error('Motivo do cancelamento é obrigatório');
+    }
+    this.alterarStatus(statusCancelado);
+    this.props.motivoCancelamento = motivoCancelamento.trim();
+    this.touch();
   }
 
   isActive(): boolean {

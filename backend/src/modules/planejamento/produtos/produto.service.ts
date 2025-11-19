@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '@infra/database';
 import { ProdutoStatus, TenantRole } from '@prisma/client';
 import { CreateProdutoDto } from './dto/create-produto.dto';
@@ -29,11 +25,11 @@ export class ProdutoService {
     const produtos = await this.prisma.produto.findMany({
       where: {
         tenant_id: tenant,
-        deleted_at: null
+        deleted_at: null,
       },
       orderBy: {
-        created_at: 'desc'
-      }
+        created_at: 'desc',
+      },
     });
 
     return produtos.map((produto) => this.toView(produto));
@@ -42,7 +38,7 @@ export class ProdutoService {
   async create(
     tenantId: string,
     dto: CreateProdutoDto,
-    user: JwtAccessPayload
+    user: JwtAccessPayload,
   ): Promise<ProdutoView> {
     this.ensureCanWrite(user, tenantId);
 
@@ -51,8 +47,8 @@ export class ProdutoService {
         tenant_id: BigInt(tenantId),
         nome: dto.nome,
         descricao: dto.descricao ?? null,
-        status: dto.status ?? ProdutoStatus.ACTIVE
-      }
+        status: dto.status ?? ProdutoStatus.ACTIVE,
+      },
     });
 
     return this.toView(produto);
@@ -63,8 +59,8 @@ export class ProdutoService {
       where: {
         id: BigInt(produtoId),
         tenant_id: BigInt(tenantId),
-        deleted_at: null
-      }
+        deleted_at: null,
+      },
     });
 
     if (!produto) {
@@ -78,7 +74,7 @@ export class ProdutoService {
     tenantId: string,
     produtoId: string,
     dto: UpdateProdutoDto,
-    user: JwtAccessPayload
+    user: JwtAccessPayload,
   ): Promise<ProdutoView> {
     this.ensureCanWrite(user, tenantId);
 
@@ -89,8 +85,8 @@ export class ProdutoService {
       data: {
         nome: dto.nome,
         descricao: dto.descricao,
-        status: dto.status
-      }
+        status: dto.status,
+      },
     });
 
     return this.toView(produto);
@@ -103,8 +99,8 @@ export class ProdutoService {
     await this.prisma.produto.update({
       where: { id: BigInt(produtoId) },
       data: {
-        deleted_at: new Date()
-      }
+        deleted_at: new Date(),
+      },
     });
   }
 
@@ -113,8 +109,8 @@ export class ProdutoService {
       where: {
         id: BigInt(produtoId),
         tenant_id: BigInt(tenantId),
-        deleted_at: null
-      }
+        deleted_at: null,
+      },
     });
 
     if (!produto) {
@@ -147,8 +143,7 @@ export class ProdutoService {
       descricao: produto.descricao,
       status: produto.status,
       created_at: produto.created_at,
-      updated_at: produto.updated_at
+      updated_at: produto.updated_at,
     };
   }
 }
-

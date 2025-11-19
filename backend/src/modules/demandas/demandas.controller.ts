@@ -3,6 +3,7 @@ import {
   Post,
   Get,
   Patch,
+  Delete,
   Body,
   Query,
   Param,
@@ -28,6 +29,9 @@ import { BuscarDemandaPorIdQuery } from '@application/demandas/queries/buscar-de
 import { DemandaDetalhada } from '@application/demandas/queries/buscar-demanda-por-id.handler';
 import { AdicionarComentarioCommand } from '@application/demandas/commands/adicionar-comentario.command';
 import { AdicionarAnexoCommand } from '@application/demandas/commands/adicionar-anexo.command';
+import { AdicionarTagCommand } from '@application/demandas/commands/adicionar-tag.command';
+import { RemoverTagCommand } from '@application/demandas/commands/remover-tag.command';
+import { CancelarDemandaCommand } from '@application/demandas/commands/cancelar-demanda.command';
 import { ListarComentariosQuery } from '@application/demandas/queries/listar-comentarios.query';
 import { ComentarioListItem } from '@application/demandas/queries/listar-comentarios.handler';
 import { ListarAnexosQuery } from '@application/demandas/queries/listar-anexos.query';
@@ -38,7 +42,7 @@ import { AdicionarComentarioDto } from './dto/adicionar-comentario.dto';
 import { AtualizarDemandaDto } from './dto/atualizar-demanda.dto';
 import { AtualizarDemandaCommand } from '@application/demandas/commands/atualizar-demanda.command';
 
-@Controller('v1/demandas')
+@Controller('demandas')
 @UseGuards(JwtAuthGuard, TenantGuard)
 export class DemandasController {
   constructor(
@@ -62,6 +66,9 @@ export class DemandasController {
       dto.descricao,
       dto.origem,
       dto.origemDetalhe,
+      dto.prioridade,
+      dto.status,
+      dto.responsavelId,
     );
 
     const demandaId = await this.commandBus.execute(command);
@@ -137,12 +144,7 @@ export class DemandasController {
     @Body() dto: AdicionarComentarioDto,
     @CurrentUser() user: JwtAccessPayload,
   ) {
-    const command = new AdicionarComentarioCommand(
-      tenantId,
-      demandaId,
-      user.sub,
-      dto.texto,
-    );
+    const command = new AdicionarComentarioCommand(tenantId, demandaId, user.sub, dto.texto);
 
     const comentarioId = await this.commandBus.execute(command);
 
@@ -153,9 +155,7 @@ export class DemandasController {
   }
 
   @Get(':id/comentarios')
-  async listarComentarios(
-    @Param('id') demandaId: string,
-  ): Promise<ComentarioListItem[]> {
+  async listarComentarios(@Param('id') demandaId: string): Promise<ComentarioListItem[]> {
     const query = new ListarComentariosQuery(demandaId);
     return this.queryBus.execute(query);
   }
@@ -173,21 +173,49 @@ export class DemandasController {
       throw new BadRequestException('Arquivo é obrigatório');
     }
 
-    const command = new AdicionarAnexoCommand(
-      tenantId,
-      demandaId,
-      arquivo,
-      user.sub,
-    );
+    const command = new AdicionarAnexoCommand(tenantId, demandaId, arquivo, user.sub);
 
     return this.commandBus.execute(command);
   }
 
   @Get(':id/anexos')
-  async listarAnexos(
-    @Param('id') demandaId: string,
-  ): Promise<Anexo[]> {
+  async listarAnexos(@Param('id') demandaId: string): Promise<Anexo[]> {
     const query = new ListarAnexosQuery(demandaId);
     return this.queryBus.execute(query);
+  }
+
+  @Post(':id/tags')
+  @HttpCode(HttpStatus.CREATED)
+  async adicionarTag(
+    @TenantId() tenantId: string,
+    @Param('id') demandaId: string,
+    @Body() dto: { tagNome: string },
+  ) {
+    const command = new AdicionarTagCommand(tenantId, demandaId, dto.tagNome);
+    await this.commandBus.execute(command);
+    return { message: 'Tag adicionada com sucesso' };
+  }
+
+  @Delete(':id/tags/:tagId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removerTag(
+    @TenantId() tenantId: string,
+    @Param('id') demandaId: string,
+    @Param('tagId') tagId: string,
+  ) {
+    const command = new RemoverTagCommand(tenantId, demandaId, tagId);
+    await this.commandBus.execute(command);
+  }
+
+  @Post(':id/cancelar')
+  @HttpCode(HttpStatus.OK)
+  async cancelarDemanda(
+    @TenantId() tenantId: string,
+    @Param('id') demandaId: string,
+    @Body() dto: { motivoCancelamento: string },
+  ) {
+    const command = new CancelarDemandaCommand(tenantId, demandaId, dto.motivoCancelamento);
+    await this.commandBus.execute(command);
+    return { message: 'Demanda cancelada com sucesso' };
   }
 }

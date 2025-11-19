@@ -9,6 +9,9 @@ import { CriarDemandaRapidaHandler } from '@application/demandas/commands/criar-
 import { AdicionarComentarioHandler } from '@application/demandas/commands/adicionar-comentario.handler';
 import { AdicionarAnexoHandler } from '@application/demandas/commands/adicionar-anexo.handler';
 import { AtualizarDemandaHandler } from '@application/demandas/commands/atualizar-demanda.handler';
+import { AdicionarTagHandler } from '@application/demandas/commands/adicionar-tag.handler';
+import { RemoverTagHandler } from '@application/demandas/commands/remover-tag.handler';
+import { CancelarDemandaHandler } from '@application/demandas/commands/cancelar-demanda.handler';
 import { ListarDemandasHandler } from '@application/demandas/queries/listar-demandas.handler';
 import { BuscarDemandaPorIdHandler } from '@application/demandas/queries/buscar-demanda-por-id.handler';
 import { ListarComentariosHandler } from '@application/demandas/queries/listar-comentarios.handler';
@@ -18,9 +21,24 @@ import { COMENTARIO_REPOSITORY_TOKEN } from '@infra/repositories/demandas/coment
 import { AnexoRepository } from '@infra/repositories/demandas/anexo.repository';
 import { ANEXO_REPOSITORY_TOKEN } from '@infra/repositories/demandas/anexo.repository.interface';
 import { StorageService } from '@infra/storage/storage.service';
+import { CatalogoRepository } from '@infra/repositories/catalog/catalog.repository';
+import { CATALOGO_REPOSITORY_TOKEN } from '@domain/catalog/catalog.repository.interface';
 
-const CommandHandlers = [CriarDemandaRapidaHandler, AdicionarComentarioHandler, AdicionarAnexoHandler, AtualizarDemandaHandler];
-const QueryHandlers = [ListarDemandasHandler, BuscarDemandaPorIdHandler, ListarComentariosHandler, ListarAnexosHandler];
+const CommandHandlers = [
+  CriarDemandaRapidaHandler,
+  AdicionarComentarioHandler,
+  AdicionarAnexoHandler,
+  AtualizarDemandaHandler,
+  AdicionarTagHandler,
+  RemoverTagHandler,
+  CancelarDemandaHandler,
+];
+const QueryHandlers = [
+  ListarDemandasHandler,
+  BuscarDemandaPorIdHandler,
+  ListarComentariosHandler,
+  ListarAnexosHandler,
+];
 const EventHandlers: any[] = [];
 
 @Module({
@@ -41,10 +59,19 @@ const EventHandlers: any[] = [];
       provide: ANEXO_REPOSITORY_TOKEN,
       useClass: AnexoRepository,
     },
+    {
+      provide: CATALOGO_REPOSITORY_TOKEN,
+      useClass: CatalogoRepository,
+    },
     ...CommandHandlers,
     ...QueryHandlers,
     ...EventHandlers,
   ],
-  exports: [DEMANDA_REPOSITORY_TOKEN, COMENTARIO_REPOSITORY_TOKEN, ANEXO_REPOSITORY_TOKEN],
+  exports: [
+    DEMANDA_REPOSITORY_TOKEN,
+    COMENTARIO_REPOSITORY_TOKEN,
+    ANEXO_REPOSITORY_TOKEN,
+    CATALOGO_REPOSITORY_TOKEN,
+  ],
 })
 export class DemandasModule {}

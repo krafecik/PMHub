@@ -12,7 +12,7 @@ export function initializeTelemetry() {
   diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR);
 
   sdk = new NodeSDK({
-    instrumentations: [getNodeAutoInstrumentations()]
+    instrumentations: [getNodeAutoInstrumentations()],
   });
 
   (async () => {
@@ -37,4 +37,3 @@ export async function shutdownTelemetry() {
     sdk = null;
   }
 }
-

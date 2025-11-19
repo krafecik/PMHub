@@ -2,6 +2,7 @@
 
 import { ReactNode, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { TenantSwitcher } from './tenant-switcher'
 import { SidebarNav } from './navigation/sidebar-nav'
 import { useAuthStore } from '@/store/auth-store'
@@ -51,14 +52,19 @@ export function AppShell({ children }: AppShellProps) {
         >
           {/* Logo area */}
           <div className="flex h-16 items-center justify-between border-b px-4 dark:border-secondary-800">
-            {!isCollapsed && (
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 font-bold text-white">
-                  C
-                </div>
-                <span className="gradient-text text-xl font-bold">CPOPM Hub</span>
-              </div>
-            )}
+            <div className={cn('flex items-center', isCollapsed ? 'mx-auto' : 'flex-1')}>
+              <Image
+                src="/PMHubLogo.png"
+                alt="PM Hub Logo"
+                width={isCollapsed ? 32 : 180}
+                height={32}
+                priority
+                className={cn(
+                  'object-contain',
+                  isCollapsed ? 'h-8 w-8' : 'h-10 w-auto max-w-[180px]',
+                )}
+              />
+            </div>
             <Button
               variant="ghost"
               size="icon"
@@ -172,7 +178,7 @@ export function AppShell({ children }: AppShellProps) {
 
           {/* Main content area */}
           <main className="flex-1 overflow-y-auto">
-            <div className="mx-auto max-w-7xl p-6">{children}</div>
+            <div className="h-full px-4 py-6">{children}</div>
           </main>
         </div>
       </div>

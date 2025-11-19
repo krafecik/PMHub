@@ -1,5 +1,4 @@
-import { IsString, IsEnum, IsOptional, MinLength, MaxLength } from 'class-validator';
-import { TipoDemanda, OrigemDemanda, Prioridade, StatusDemanda } from '@prisma/client';
+import { IsString, IsOptional, MinLength, MaxLength } from 'class-validator';
 
 export class AtualizarDemandaDto {
   @IsOptional()
@@ -14,12 +13,12 @@ export class AtualizarDemandaDto {
   descricao?: string;
 
   @IsOptional()
-  @IsEnum(TipoDemanda, { message: 'Tipo de demanda inválido' })
-  tipo?: TipoDemanda;
+  @IsString()
+  tipo?: string;
 
   @IsOptional()
-  @IsEnum(OrigemDemanda, { message: 'Origem de demanda inválida' })
-  origem?: OrigemDemanda;
+  @IsString()
+  origem?: string;
 
   @IsOptional()
   @IsString()
@@ -27,14 +26,14 @@ export class AtualizarDemandaDto {
   origemDetalhe?: string;
 
   @IsOptional()
-  @IsEnum(Prioridade, { message: 'Prioridade inválida' })
-  prioridade?: Prioridade;
+  @IsString()
+  prioridade?: string;
 
   @IsOptional()
   @IsString()
   responsavelId?: string | null;
 
   @IsOptional()
-  @IsEnum(StatusDemanda, { message: 'Status de demanda inválido' })
-  status?: StatusDemanda;
+  @IsString()
+  status?: string;
 }

@@ -10,8 +10,8 @@ export class TenantContextMiddleware implements NestMiddleware {
       typeof headerTenant === 'string'
         ? headerTenant
         : Array.isArray(headerTenant)
-        ? headerTenant[0]
-        : undefined;
+          ? headerTenant[0]
+          : undefined;
 
     const currentUser = req.user as JwtAccessPayload | undefined;
 
@@ -24,4 +24,3 @@ export class TenantContextMiddleware implements NestMiddleware {
     next();
   }
 }
-

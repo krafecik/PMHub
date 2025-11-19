@@ -1,5 +1,4 @@
-import { IsString, IsEnum, IsOptional, MinLength, MaxLength } from 'class-validator';
-import { TipoDemanda, OrigemDemanda } from '@prisma/client';
+import { IsString, IsOptional, MinLength, MaxLength } from 'class-validator';
 
 export class CriarDemandaRapidaDto {
   @IsString()
@@ -7,8 +6,8 @@ export class CriarDemandaRapidaDto {
   @MaxLength(255, { message: 'Título deve ter no máximo 255 caracteres' })
   titulo!: string;
 
-  @IsEnum(TipoDemanda, { message: 'Tipo de demanda inválido' })
-  tipo!: TipoDemanda;
+  @IsString()
+  tipo!: string;
 
   @IsString()
   produtoId!: string;
@@ -19,11 +18,24 @@ export class CriarDemandaRapidaDto {
   descricao?: string;
 
   @IsOptional()
-  @IsEnum(OrigemDemanda, { message: 'Origem de demanda inválida' })
-  origem?: OrigemDemanda;
+  @IsString()
+  origem?: string;
 
   @IsOptional()
   @IsString()
   @MaxLength(255, { message: 'Origem detalhe deve ter no máximo 255 caracteres' })
   origemDetalhe?: string;
+
+  @IsOptional()
+  @IsString()
+  prioridade?: string;
+
+  @IsOptional()
+  @IsString()
+  status?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(255, { message: 'Responsável deve ter no máximo 255 caracteres' })
+  responsavelId?: string;
 }

@@ -1,0 +1,259 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - img [ref=e7]
+      - navigation [ref=e8]:
+        - navigation [ref=e9]:
+          - link [ref=e12] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e14]
+            - generic [ref=e19]: Dashboard
+          - link [ref=e22] [cursor=pointer]:
+            - /url: /produtos
+            - img [ref=e24]
+            - generic [ref=e26]: Produtos
+          - link [ref=e29] [cursor=pointer]:
+            - /url: /demandas
+            - img [ref=e31]
+            - generic [ref=e34]: Demandas
+            - generic [ref=e35]: Novo
+          - link [ref=e38] [cursor=pointer]:
+            - /url: /triagem
+            - img [ref=e40]
+            - generic [ref=e42]: Triagem
+            - generic [ref=e43]: "27"
+          - link [ref=e46] [cursor=pointer]:
+            - /url: /discovery
+            - img [ref=e48]
+            - generic [ref=e50]: Discovery
+            - generic [ref=e51]: Novo
+          - generic [ref=e52]:
+            - button [ref=e53] [cursor=pointer]:
+              - img [ref=e55]
+              - generic [ref=e57]: Planejamento
+              - img [ref=e58]
+            - generic [ref=e60]:
+              - link [ref=e62] [cursor=pointer]:
+                - /url: /planejamento
+                - img [ref=e64]
+                - generic [ref=e69]: Dashboard
+              - link [ref=e71] [cursor=pointer]:
+                - /url: /planejamento/planning-trimestral
+                - img [ref=e73]
+                - generic [ref=e75]: Planning Trimestral
+              - link [ref=e77] [cursor=pointer]:
+                - /url: /planejamento/epicos
+                - img [ref=e79]
+                - generic [ref=e83]: Épicos
+              - link [ref=e85] [cursor=pointer]:
+                - /url: /planejamento/features
+                - img [ref=e87]
+                - generic [ref=e97]: Features
+              - link [ref=e99] [cursor=pointer]:
+                - /url: /planejamento/dependencias
+                - img [ref=e101]
+                - generic [ref=e105]: Dependências
+              - link [ref=e107] [cursor=pointer]:
+                - /url: /planejamento/roadmap
+                - img [ref=e109]
+                - generic [ref=e111]: Roadmap Timeline
+              - link [ref=e113] [cursor=pointer]:
+                - /url: /planejamento/simulador
+                - img [ref=e115]
+                - generic [ref=e116]: Simulador de Cenários
+              - link [ref=e118] [cursor=pointer]:
+                - /url: /planejamento/compromissos
+                - img [ref=e120]
+                - generic [ref=e124]: Compromissos Trimestrais
+              - link [ref=e126] [cursor=pointer]:
+                - /url: /planejamento/capacidade
+                - img [ref=e128]
+                - generic [ref=e130]: Capacidade por Squad
+              - link [ref=e132] [cursor=pointer]:
+                - /url: /planejamento/configuracao
+                - img [ref=e134]
+                - generic [ref=e137]: Configuração
+          - generic [ref=e138]:
+            - button [ref=e139] [cursor=pointer]:
+              - img [ref=e141]
+              - generic [ref=e143]: Documentação
+              - img [ref=e144]
+            - generic [ref=e146]:
+              - link [ref=e148] [cursor=pointer]:
+                - /url: /documentacao
+                - img [ref=e150]
+                - generic [ref=e152]: Biblioteca
+              - link [ref=e154] [cursor=pointer]:
+                - /url: /documentacao/novo
+                - img [ref=e156]
+                - generic [ref=e159]: Novo Documento
+              - button [disabled] [ref=e160]:
+                - img [ref=e162]
+                - generic [ref=e166]: Release Notes
+                - generic [ref=e167]: Em breve
+          - generic [ref=e168]:
+            - button [disabled] [ref=e169]:
+              - img [ref=e171]
+              - generic [ref=e176]: Validação
+              - img [ref=e177]
+            - generic [ref=e179]:
+              - button [disabled] [ref=e180]:
+                - img [ref=e182]
+                - generic [ref=e187]: Go-to-Market
+              - button [disabled] [ref=e188]:
+                - img [ref=e190]
+                - generic [ref=e193]: Checklists
+          - generic [ref=e194]:
+            - button [disabled] [ref=e195]:
+              - img [ref=e197]
+              - generic [ref=e200]: Métricas
+              - img [ref=e201]
+            - generic [ref=e203]:
+              - button [disabled] [ref=e204]:
+                - img [ref=e206]
+                - generic [ref=e208]: KPIs
+              - button [disabled] [ref=e209]:
+                - img [ref=e211]
+                - generic [ref=e213]: Health Score
+          - button [disabled] [ref=e215]:
+            - img [ref=e217]
+            - generic [ref=e222]: Governança
+          - link [ref=e224] [cursor=pointer]:
+            - /url: /settings/tenant
+            - img [ref=e226]
+            - generic [ref=e229]: Configurações do Tenant
+          - link [ref=e231] [cursor=pointer]:
+            - /url: /settings/catalogos
+            - img [ref=e233]
+            - generic [ref=e236]: Catálogos flexíveis
+          - link [ref=e238] [cursor=pointer]:
+            - /url: /settings/usuarios
+            - img [ref=e240]
+            - generic [ref=e245]: Usuários & acessos
+      - generic [ref=e249]: v0.1 • MVP
+      - button [ref=e251] [cursor=pointer]:
+        - img [ref=e252]
+    - generic [ref=e253]:
+      - banner [ref=e254]:
+        - generic [ref=e256]:
+          - img [ref=e257]
+          - generic [ref=e260]: Buscar...
+          - generic [ref=e261]:
+            - img [ref=e262]
+            - text: K
+        - generic [ref=e264]:
+          - button [ref=e265] [cursor=pointer]:
+            - img [ref=e266]
+            - generic [ref=e270]: Tenant Demo
+            - img [ref=e271]
+          - button [ref=e273] [cursor=pointer]:
+            - img [ref=e274]
+            - generic [ref=e280]: Alternar tema
+          - button [ref=e281] [cursor=pointer]:
+            - img [ref=e282]
+          - generic [ref=e286]:
+            - generic [ref=e287]:
+              - generic [ref=e288]: PM de Teste
+              - generic [ref=e289]: pm@example.com
+            - generic [ref=e291]: PD
+            - button [ref=e292] [cursor=pointer]:
+              - img [ref=e293]
+      - main [ref=e296]:
+        - generic [ref=e298]:
+          - generic [ref=e299]:
+            - generic [ref=e300]:
+              - generic [ref=e301]:
+                - heading [level=1] [ref=e302]: Produtos
+                - paragraph [ref=e303]: Gerencie os produtos vinculados ao tenant atual
+              - generic [ref=e304]:
+                - button [ref=e305] [cursor=pointer]:
+                  - img [ref=e306]
+                - button [ref=e309] [cursor=pointer]:
+                  - img [ref=e310]
+                  - text: Novo Produto
+            - generic [ref=e311]:
+              - generic [ref=e316]:
+                - generic [ref=e317]:
+                  - paragraph [ref=e318]: Total de Produtos
+                  - paragraph [ref=e319]: "1"
+                - img [ref=e321]
+              - generic [ref=e326]:
+                - generic [ref=e327]:
+                  - generic [ref=e328]:
+                    - paragraph [ref=e329]: Produtos Ativos
+                    - paragraph [ref=e330]: "1"
+                  - img [ref=e332]
+                - generic [ref=e335]:
+                  - img [ref=e336]
+                  - generic [ref=e338]: +5%
+                  - generic [ref=e339]: vs. mês anterior
+              - generic [ref=e344]:
+                - generic [ref=e345]:
+                  - paragraph [ref=e346]: Produtos Inativos
+                  - paragraph [ref=e347]: "0"
+                - img [ref=e349]
+              - generic [ref=e356]:
+                - generic [ref=e357]:
+                  - generic [ref=e358]:
+                    - paragraph [ref=e359]: Saúde Média
+                    - paragraph [ref=e360]: 85%
+                  - img [ref=e362]
+                - generic [ref=e364]:
+                  - img [ref=e365]
+                  - generic [ref=e367]: +3%
+                  - generic [ref=e368]: vs. mês anterior
+            - generic [ref=e371]:
+              - img [ref=e372]
+              - textbox [ref=e375]:
+                - /placeholder: Buscar produtos por nome ou descrição...
+            - generic [ref=e382] [cursor=pointer]:
+              - generic [ref=e383]:
+                - generic [ref=e384]:
+                  - img [ref=e386]
+                  - generic [ref=e388]:
+                    - heading [level=3] [ref=e389]: Produto Orion
+                    - generic [ref=e390]:
+                      - img [ref=e391]
+                      - text: Ativo
+                - button [ref=e394]:
+                  - img [ref=e395]
+              - paragraph [ref=e399]: Descrição padrão do produto.
+              - generic [ref=e400]:
+                - generic [ref=e401]:
+                  - img [ref=e403]
+                  - paragraph [ref=e406]: "41"
+                  - paragraph [ref=e407]: Demandas
+                - generic [ref=e408]:
+                  - img [ref=e410]
+                  - paragraph [ref=e412]: "12"
+                  - paragraph [ref=e413]: Ativas
+                - generic [ref=e414]:
+                  - img [ref=e416]
+                  - paragraph [ref=e419]: 91%
+                  - paragraph [ref=e420]: Saúde
+              - generic [ref=e421]:
+                - img [ref=e422]
+                - generic [ref=e425]:
+                  - generic [ref=e426]: 91%
+                  - generic [ref=e427]: Score
+              - paragraph [ref=e429]: Atualizado agora mesmo
+          - button [ref=e431] [cursor=pointer]:
+            - img [ref=e432]
+  - menu "Ações do produto Produto Orion" [ref=e434]:
+    - menuitem "Editar produto" [ref=e435] [cursor=pointer]:
+      - img [ref=e436]
+      - text: Editar produto
+    - separator [ref=e439]
+    - menuitem "Remover produto" [active] [ref=e440] [cursor=pointer]:
+      - img [ref=e441]
+      - text: Remover produto
+  - generic [ref=e446] [cursor=pointer]:
+    - img [ref=e447]
+    - generic [ref=e449]: 1 error
+    - button "Hide Errors" [ref=e450]:
+      - img [ref=e451]
+```

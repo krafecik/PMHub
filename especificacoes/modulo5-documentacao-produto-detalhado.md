@@ -330,58 +330,87 @@ IA auxilia em:
 
 # 🧱 14. Tabelas de Banco (completo)
 
-## 14.1. Tabela Documento
+Documento
+- id_documento      UUID PK
+- tipo              enum('PRD','BRD','RFC','SPEC','RELEASE_NOTE',...)
+- titulo            varchar
+- resumo            text
+- id_versao_atual   UUID FK → DocumentoVersao
+- status            enum('rascunho','revisao','aprovado','obsoleto')
+- id_produto        FK Produto
+- id_pm             FK Usuario
+- id_squad          FK Squad
+- id_tenant         FK Tenant (opcional, mas recomendo)
+- criado_por        FK Usuario
+- criado_em         datetime
+- atualizado_em     datetime
+📄 DocumentoVersao
+text
+Copiar código
+DocumentoVersao
+- id_versao         UUID PK
+- id_documento      UUID FK
+- versao            varchar (ex: "1.3")
+- conteudo_json     jsonb
+- changelog_resumo  text
+- criado_por        FK Usuario
+- criado_em         datetime
+🔗 Vínculos
+text
+Copiar código
+DocumentoVinculo
+- id_vinculo        UUID PK
+- id_documento      UUID FK
+- tipo_alvo         enum('discovery','epico','feature','demanda','release')
+- id_alvo           UUID/bigint
+- criado_por        FK Usuario
+- criado_em         datetime
+🏷️ Tags
+text
+Copiar código
+Tag
+- id_tag           UUID PK
+- nome             varchar unique
 
-| Campo | Tipo |
-|--------|--------|
-| id_documento | UUID |
-| tipo | enum(PRD, BRD, RFC, SPEC, RELEASE_NOTE) |
-| titulo | varchar |
-| resumo | text |
-| conteudo_json | json |
-| versao_atual | varchar |
-| status | enum(rascunho, revisão, aprovado, obsoleto) |
-| criado_por | FK |
-| vinculos_json | json |
-| criado_em | datetime |
-| atualizado_em | datetime |
-
----
-
-## 14.2. Tabela DocumentoVersao
-
-| Campo | Tipo |
-|--------|--------|
-| id_versao | UUID |
-| id_documento | FK |
-| versao | varchar |
-| conteudo_json | json |
-| criado_por | FK |
-| criado_em | datetime |
-
----
-
-## 14.3. Tabela DocumentoAnexo
-
-| Campo | Tipo |
-|--------|--------|
-| id_anexo | UUID |
-| id_documento | FK |
-| url | varchar |
-| tipo_mime | varchar |
-| criado_em | datetime |
-
----
-
-## 14.4. Tabela DocumentoComentario
-
-| Campo | Tipo |
-|--------|--------|
-| id_comentario | UUID |
-| id_documento | FK |
-| id_usuario | FK |
-| texto | text |
-| criado_em | datetime |
+DocumentoTag
+- id_documento     UUID FK
+- id_tag           UUID FK
+- criado_em        datetime
+📎 Anexos
+text
+Copiar código
+DocumentoAnexo
+- id_anexo         UUID PK
+- id_versao        UUID FK → DocumentoVersao
+- url              varchar
+- tipo_mime        varchar
+- nome_arquivo     varchar
+- tamanho_bytes    bigint
+- criado_por       FK Usuario
+- criado_em        datetime
+💬 Comentários
+text
+Copiar código
+DocumentoComentario
+- id_comentario        UUID PK
+- id_versao            UUID FK → DocumentoVersao
+- id_usuario           FK Usuario
+- texto                text
+- criado_em            datetime
+- id_comentario_pai    UUID (para threads)
+- resolvido            bool
+- tipo                 enum('comentario','sugestao','bloqueador','aprovacao')
+✅ Aprovações (opcional mas muito útil)
+text
+Copiar código
+DocumentoAprovacao
+- id_aprovacao     UUID PK
+- id_versao        UUID FK
+- tipo_aprovacao   enum('negocio','tecnica','ux','compliance')
+- aprovado_por     FK Usuario
+- aprovado_em      datetime
+- status           enum('pendente','aprovado','reprovado')
+- comentario       text
 
 ---
 

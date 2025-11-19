@@ -4,7 +4,6 @@ import { EstrategiaService } from './estrategia.service';
 
 @Module({
   controllers: [EstrategiaController],
-  providers: [EstrategiaService]
+  providers: [EstrategiaService],
 })
 export class EstrategiaModule {}
-

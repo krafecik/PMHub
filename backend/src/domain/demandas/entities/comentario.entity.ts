@@ -19,15 +19,13 @@ export class Comentario {
 
   static create(props: Omit<ComentarioProps, 'createdAt' | 'updatedAt'>): Comentario {
     const { texto } = props;
-    
+
     if (!texto || texto.trim().length < Comentario.MIN_LENGTH) {
       throw new Error('Comentário não pode estar vazio');
     }
 
     if (texto.length > Comentario.MAX_LENGTH) {
-      throw new Error(
-        `Comentário deve ter no máximo ${Comentario.MAX_LENGTH} caracteres`
-      );
+      throw new Error(`Comentário deve ter no máximo ${Comentario.MAX_LENGTH} caracteres`);
     }
 
     return new Comentario({
@@ -74,9 +72,7 @@ export class Comentario {
     }
 
     if (novoTexto.length > Comentario.MAX_LENGTH) {
-      throw new Error(
-        `Comentário deve ter no máximo ${Comentario.MAX_LENGTH} caracteres`
-      );
+      throw new Error(`Comentário deve ter no máximo ${Comentario.MAX_LENGTH} caracteres`);
     }
 
     this.props.texto = novoTexto.trim();
@@ -87,7 +83,7 @@ export class Comentario {
     if (!this.props.createdAt || !this.props.updatedAt) {
       return false;
     }
-    
+
     // Considera editado se updatedAt é mais de 1 segundo após createdAt
     return this.props.updatedAt.getTime() - this.props.createdAt.getTime() > 1000;
   }

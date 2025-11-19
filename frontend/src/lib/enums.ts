@@ -57,3 +57,13 @@ export const statusDemandaLabels: Record<StatusDemanda, string> = {
   [StatusDemanda.TRIAGEM]: 'Triagem',
   [StatusDemanda.ARQUIVADO]: 'Arquivado',
 }
+
+export enum StatusTriagem {
+  PENDENTE_TRIAGEM = 'PENDENTE_TRIAGEM',
+  AGUARDANDO_INFO = 'AGUARDANDO_INFO',
+  RETOMADO_TRIAGEM = 'RETOMADO_TRIAGEM',
+  PRONTO_DISCOVERY = 'PRONTO_DISCOVERY',
+  ARQUIVADO = 'ARQUIVADO',
+  DUPLICADO = 'DUPLICADO',
+  EVOLUIU_EPICO = 'EVOLUIU_EPICO',
+}

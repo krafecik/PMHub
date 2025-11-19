@@ -5,4 +5,3 @@ export const CurrentUser = createParamDecorator((_data: unknown, ctx: ExecutionC
   const request = ctx.switchToHttp().getRequest();
   return request.user as JwtAccessPayload | undefined;
 });
-

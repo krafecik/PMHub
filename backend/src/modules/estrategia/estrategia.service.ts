@@ -5,8 +5,7 @@ export class EstrategiaService {
   getStatus() {
     return {
       module: 'estrategia',
-      ready: false
+      ready: false,
     };
   }
 }
-

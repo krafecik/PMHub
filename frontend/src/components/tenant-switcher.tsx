@@ -79,7 +79,10 @@ export function TenantSwitcher() {
                   'focus:bg-secondary-100 focus:text-text-primary',
                   isSelected && 'bg-primary-50 text-primary-700',
                 )}
-                onSelect={() => handleTenantChange(tenant.id)}
+                onSelect={(e) => {
+                  e.preventDefault()
+                  handleTenantChange(tenant.id)
+                }}
               >
                 <Building2 className="h-4 w-4" />
                 <span className="flex-1 truncate">{tenant.nome ?? `Tenant ${tenant.id}`}</span>

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import { apiFetch } from '@/lib/api-client'
 
 interface AnexoUploaderProps {
   demandaId: string
@@ -41,14 +42,18 @@ export function AnexoUploader({ demandaId }: AnexoUploaderProps) {
   const { data: anexos, isLoading } = useQuery({
     queryKey: ['anexos', demandaId],
     queryFn: async () => {
-      const response = await fetch(`/api/v1/demandas/${demandaId}/anexos`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-        },
-      })
-      if (!response.ok) throw new Error('Erro ao carregar anexos')
-      return response.json() as Promise<Anexo[]>
+      try {
+        return await apiFetch<Anexo[]>(`/demandas/${demandaId}/anexos`, {
+          method: 'GET',
+        })
+      } catch (error) {
+        // Se o endpoint não existir ou retornar erro, retorna array vazio
+        // Isso evita quebrar a UI quando o endpoint ainda não está disponível
+        console.warn('Erro ao carregar anexos:', error)
+        return []
+      }
     },
+    retry: false,
   })
 
   const uploadMutation = useMutation({
@@ -56,20 +61,10 @@ export function AnexoUploader({ demandaId }: AnexoUploaderProps) {
       const formData = new FormData()
       formData.append('arquivo', file)
 
-      const response = await fetch(`/api/v1/demandas/${demandaId}/anexos`, {
+      return apiFetch<Anexo>(`/demandas/${demandaId}/anexos`, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-        },
         body: formData,
       })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Erro ao fazer upload do arquivo')
-      }
-
-      return response.json()
     },
     onSuccess: (_, file) => {
       queryClient.invalidateQueries({ queryKey: ['anexos', demandaId] })

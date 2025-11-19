@@ -21,7 +21,7 @@ async function bootstrap() {
   const nodeEnv = configService.get('NODE_ENV', { infer: true });
 
   const logger = pino({
-    level: nodeEnv === 'production' ? 'info' : 'debug'
+    level: nodeEnv === 'production' ? 'info' : 'debug',
   });
 
   app.use(
@@ -29,13 +29,13 @@ async function bootstrap() {
       logger,
       genReqId: () => randomUUID(),
       customProps: (req: any) => ({
-        trace_id: req.id as string | undefined
-      })
-    })
+        trace_id: req.id as string | undefined,
+      }),
+    }),
   );
 
   app.setGlobalPrefix('v1', {
-    exclude: ['health', 'metrics']
+    exclude: ['health', 'metrics'],
   });
   app.use(cookieParser());
   app.use(
@@ -43,20 +43,20 @@ async function bootstrap() {
       windowMs: 60 * 1000,
       max: 60,
       standardHeaders: true,
-      legacyHeaders: false
-    })
+      legacyHeaders: false,
+    }),
   );
   app.use(helmet());
   app.enableCors({
     origin: configService.get('NODE_ENV', { infer: true }) === 'production' ? false : true,
-    credentials: true
+    credentials: true,
   });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       transform: true,
-      transformOptions: { enableImplicitConversion: true }
-    })
+      transformOptions: { enableImplicitConversion: true },
+    }),
   );
 
   await app.listen(port);
@@ -76,4 +76,3 @@ bootstrap().catch((error) => {
   Logger.error('Error during bootstrap', error);
   process.exit(1);
 });
-

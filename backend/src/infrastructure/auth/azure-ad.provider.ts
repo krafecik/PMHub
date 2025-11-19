@@ -30,17 +30,15 @@ export class AzureAdProvider {
         throw new Error('Variáveis de ambiente do Azure AD não configuradas.');
       }
 
-      const issuer = await Issuer.discover(
-        `https://login.microsoftonline.com/${tenantId}/v2.0`
-      );
+      const issuer = await Issuer.discover(`https://login.microsoftonline.com/${tenantId}/v2.0`);
 
       this.clientPromise = Promise.resolve(
         new issuer.Client({
           client_id: clientId,
           client_secret: clientSecret,
           redirect_uris: [redirectUri],
-          response_types: ['code']
-        })
+          response_types: ['code'],
+        }),
       );
     }
 
@@ -62,7 +60,7 @@ export class AzureAdProvider {
       code_challenge_method: 'S256',
       redirect_uri: redirectUri,
       response_type: 'code',
-      prompt: 'select_account'
+      prompt: 'select_account',
     });
   }
 
@@ -77,12 +75,11 @@ export class AzureAdProvider {
     return client.callback(
       redirectUri,
       {
-        code: params.code
+        code: params.code,
       },
       {
-        code_verifier: params.codeVerifier
-      }
+        code_verifier: params.codeVerifier,
+      },
     );
   }
 }
-

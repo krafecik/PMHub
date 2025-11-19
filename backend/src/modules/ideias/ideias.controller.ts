@@ -12,4 +12,3 @@ export class IdeiasController {
     return this.service.getStatus();
   }
 }
-

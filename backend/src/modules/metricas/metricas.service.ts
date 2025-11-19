@@ -5,8 +5,7 @@ export class MetricasService {
   getStatus() {
     return {
       module: 'metricas',
-      ready: false
+      ready: false,
     };
   }
 }
-

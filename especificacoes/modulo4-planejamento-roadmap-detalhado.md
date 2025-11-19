@@ -1,417 +1,440 @@
-# Módulo 4 – Planejamento & Roadmap  
-### Documento completo, profundo e altamente detalhado (UX/UI + processos + tabelas + heurísticas + cenários + governança)
+# Módulo 5 – Documentação de Produto  
+### PRD • BRD • RFC • Specs Técnicas • Release Notes  
+### Documento extremamente detalhado (UX/UI + fluxos + templates + tabelas)
 
-O Planejamento & Roadmap é o **cérebro executivo** da área de Produto.  
-É aqui que tudo que veio do Discovery se transforma em:
+A documentação é a ponte entre **Discovery → Planejamento → Desenvolvimento**.  
+Este módulo padroniza e organiza tudo que PMs e POs precisam escrever para garantir:
 
-- **épicos**
-- **features**
-- **estimativas**
-- **capacidade**
-- **priorização**
-- **cenários**
-- **dependências**
-- **compromissos trimestrais**
+- clareza  
+- consistência  
+- escalabilidade  
+- rastreabilidade  
+- alinhamento entre equipes  
 
-Este módulo descreve todos os fluxos necessários para PMs, CPO, Tech Leads e equipes trabalharem num planejamento robusto e rastreável.
+A seguir, você encontrará:
 
----
-
-# 🎯 1. Objetivo Geral do Módulo
-
-Transformar descobertas validadas em um plano estratégico e operacional, que:
-
-- garanta previsibilidade  
-- organize prioridades  
-- distribua capacidade das equipes  
-- permita simulações  
-- controle dependências técnicas  
-- produza um roadmap coerente e realista  
+- Estrutura de documentação  
+- UX/UI das telas  
+- Templates oficiais  
+- Sistema de versionamento  
+- Regras de vínculo com Demandas, Discovery, Épicos e Features  
+- Tabelas de banco de dados  
+- Automação de geração de documentos  
+- Fluxos completos  
 
 ---
 
-# 👤 2. Personas Envolvidas
+# 🎯 1. Objetivo do Módulo
 
-## 🧑‍💼 Product Manager (PM)
-Cria épicos, features, estimativas, justificativas e prioriza o que entra no ciclo.
+Criar um sistema único para:
 
-## 🧑‍✈️ CPO
-Define prioridades estratégicas, valida escopo, garante alinhamento com OKRs.
-
-## 🧑‍💻 Tech Lead
-Dá estimativas, identifica riscos técnicos, analisa dependências.
-
-## 🧑‍🔧 Engineering Manager
-Garante capacidade técnica e realismo das entregas.
-
-## 🧑‍💼 Stakeholders
-Recebem visão de alto nível do roadmap.
+- Documentação funcional (PRD/BRD)  
+- Documentação técnica (Specs, RFCs)  
+- Documentação de design (UX Docs, Fluxos, Protótipos)  
+- Documentação de release (Release Notes)  
+- Históricos, revisões e versões  
+- Aprovações e alinhamento  
 
 ---
 
-# 🧠 3. Princípios de UX/UI do Módulo
+# 📚 2. Tipos de Documentos
 
-1. **Roadmap como “linha do tempo” arrastável**  
-2. **Épicos são blocos de alto nível e Features são filhos**  
-3. **Fluxos de estimativa extremamente simples**  
-4. **Capacidade visual clara por squad**  
-5. **Sistema sugere riscos e dependências automaticamente**  
-6. **Simulador de cenários com sliders e opções**  
-7. **Cores para indicar confiabilidade (Committed, Targeted, Aspirational)**  
-8. **Modo “Apresentação” para diretoria**  
-9. **Histórico completo de decisões e trocas**  
-
----
-
-# 🗂️ 4. Estrutura do Módulo
-
-1. **Planning Trimestral**  
-2. **Gestão de Épicos**  
-3. **Gestão de Features**  
-4. **Gestão de Dependências**  
-5. **Roadmap Timeline (alta visão)**  
-6. **Simulador de Cenários**  
-7. **Compromissos Trimestrais (Commitment)**  
-8. **Controle de capacidade por Squad**  
+1. **PRD – Product Requirements Document**  
+2. **BRD – Business Requirements Document**  
+3. **RFC – Request for Comments (propostas técnicas)**  
+4. **Specs – Especificações técnicas e funcionais**  
+5. **User Stories / Use Cases**  
+6. **Fluxos de UX / UI**  
+7. **Arquitetura e integrações**  
+8. **Release Notes**  
+9. **Documentos anexos (PDF, telas, protótipos)**  
+10. **Histórico de revisão**
 
 ---
 
-# 🖥️ 5. Tela: Planning Trimestral
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│ 📅 Planning Q1 2026                               [Iniciar]      │
-│ Status: Em andamento | Participantes confirmados: 12/15          │
-├─────────────────────────────────────────────────────────────────┤
-│ Fase atual: 1/5 – Preparação                                    │
-│ ✓ OKRs definidos   ✓ Backlog priorizado                          │
-│ ✓ Métricas Q4       ⚠ Lista de dívidas técnicas incompleta       │
-│ ✓ Dependências      ✓ Capacidade preliminar                      │
-├─────────────────────────────────────────────────────────────────┤
-│ [Ver checklist]            [Ver agenda completa]                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-# 📦 6. Épicos
-
-## 6.1. Lista geral
-
-```
-┌───────────────────────────────────────────────────────────────┐
-│ 📦 Épicos (27)                                      [+ Novo]   │
-├───────────────────────────────────────────────────────────────┤
-│ API v3 Migration            Squad: Alpha    Status: Em Curso   │
-│ Performance Core            Squad: Delta    Status: Planejado   │
-│ Mobile Offline Mode         Squad: Beta     Status: Em Curso    │
-│ Dashboard Analytics v2      Squad: Gamma    Status: Planejado   │
-└───────────────────────────────────────────────────────────────┘
-```
-
-## 6.2. Tela de épico (detalhada)
+# 🖥️ 3. Tela Principal – Biblioteca de Documentação
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│ 📦 Épico: API v3 Migration                    [⋯] [X]       │
-│ Status: Em Progresso | Health: 🟡 At Risk                   │
-│ Quarter: Q1 2026 | Squad: Alpha + Beta                     │
+│ 📚 Documentação de Produto                       [+ Novo]   │
 ├────────────────────────────────────────────────────────────┤
-
-🎯 Objetivo
-[Migrar a API v2 para v3 com GraphQL e novas otimizações...]
-
-📌 Value Proposition
-[Melhor DX, performance e capacidade de realtime...]
-
-📆 Datas previstas
-Início: 10/01 | Entrega prevista: 28/03
-
-📊 Critérios de Aceite
-✓ 100% endpoints migrados  
-✓ Documentação em GraphQL  
-✓ Testes automatizados acima de 90%  
-✓ Migração do gateway
-
-⏳ Features relacionadas: (4)
-- Core Services – 75%
-- Authentication – 50%
-- Data Layer – 25%
-- Documentation – 0%
-
-⚠ Riscos identificados
-- Dependência do time de DevOps
-- Banco exige migração complexa
-- Volume alto de testes
-
-📎 Arquivos e Documentos
-- PRD-APIv3.pdf  
-- RFC GraphQL Layer  
-- Desenho da Arquitetura
-
-📣 Updates (log)
-- 18/Jan: Data Layer bloqueado por DB Migration  
-- 15/Jan: Core pronto antes do previsto  
+│ Buscar documentos: [________________________________] 🔍     │
+│ Tipo [▼]  Produto [▼]  PM [▼]  Squad [▼]  Status [▼]        │
+│ Tags [▼]  Período [▼]                                      │
+├────────────────────────────────────────────────────────────┤
+│ LISTA DE DOCUMENTOS                                        │
 └────────────────────────────────────────────────────────────┘
 ```
 
----
-
-# 🧱 7. Features
-
-Features são os “blocos menores” dentro dos épicos.
-
-## 7.1. Lista
+## Card de documento
 
 ```
-┌────────────────────────────────────────────────────────┐
-│ Features de API v3                         [+ Adicionar] │
-├────────────────────────────────────────────────────────┤
-│ Core Services           34 pts   🟢 On Track            │
-│ Authentication          21 pts   🟡 At Risk             │
-│ Data Layer              55 pts   🔴 Blocked             │
-│ Documentation           13 pts   ⏸ On Hold              │
-└────────────────────────────────────────────────────────┘
-```
-
-## 7.2. Tela de Feature
-
-```
-Título:
-[Data Layer Migration]
-
-Descrição:
-[Refatorar camada de dados para suportar streaming e GraphQL...]
-
-Squad:
-[Beta ▼]
-
-Estimativa:
-[55 pontos]  | Revisado por: Tech Lead
-
-Dependências:
-[DB Migration] [GraphQL Schema]
-
-Riscos:
-- Performance incerta
-- Reescrita completa do schema
-
-Critérios de Aceite:
-✓ Testes integrados passando
-✓ Compatibilidade com API v2
-✓ Benchmark superior ao baseline
+┌──────────────────────────────────────────────────────────┐
+│ PRD • API v3 – Autenticação | Versão 1.3 | Em revisão     │
+│ Produto: ERP Core | PM: João | Squad: Alpha               │
+│ Atualizado há 2 dias                                       │
+│ Tags: [Autenticação] [API] [Segurança]                    │
+├──────────────────────────────────────────────────────────┤
+│ [Abrir]  [↻ Histórico]  [⇆ Vincular]  [↓ PDF]             │
+└──────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-# 🔗 8. Dependências
+# 📝 4. Criar Documento – Tela Completa
 
-Tela especializada para visualizar bloqueios.
-
-## 8.1. Visão de Mapa (Graph)
+A criação de documentos é altamente guiada por templates.
 
 ```
-API v3
-  ├── Webhooks System
-  │      └── Mobile Push v2
-  └── GraphQL Layer
-         └── Analytics Dashboard
-```
-
-Cores:
-
-- 🟢 Sem risco  
-- 🟡 Dependência suave  
-- 🔴 Bloqueio crítico  
-
----
-
-# 🗺️ 9. Roadmap Timeline
-
-Tela de altíssima visibilidade para CPO, diretoria e PMs.
-
-```
-Jan     Feb     Mar     |  Apr     May     Jun
-───────────────────────────────────────────────
-CRM:
-  API v3 ████████████████████████ Committed
-  Webhooks ███████ Targeted
-
-Mobile:
-  Offline Mode ████████████████ Committed
-  Biometrics       ████████ Targeted
-  AR Features             █████████ Aspiration
-
-Analytics:
-  Dashboard v2 █████████████ Committed
-  ML Insights            ██████████ Targeted
-```
-
-Elementos UX:
-
-- Arrastar e soltar épicos e features  
-- Mudar tamanho  
-- Editar status via botão flutuante  
-- Modo apresentação (foco no visual)  
-- Zoom in/out  
-
----
-
-# ⏱️ 10. Capacidade por Squad
-
-Tela dinâmica.
-
-```
-┌──────────────────────────────────────────────────────┐
-│ Squad Alpha – Capacidade 360 pts                     │
-├──────────────────────────────────────────────────────┤
-│ Alocado: 342 pts                                      │
-│ Disponível: 18 pts (95% uso)                          │
-│ Features por quarter:                                 │
-│ • API v3 – 210 pts                                    │
-│ • Webhooks – 80 pts                                   │
-│ • Tech Debt – 52 pts                                  │
-└──────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│ 📄 Novo Documento                                  [Salvar]  │
+├──────────────────────────────────────────────────────────────┤
+│ Tipo de Documento: [PRD ▼]                                     │
+│ Vincular a: [Épico/Feature/Demanda/Discovery ▼]                 │
+│ Título: [___________________________________________]          │
+│ Descrição executiva:                                            │
+│ [Texto inicial sobre o objetivo do documento...]                │
+├──────────────────────────────────────────────────────────────┤
+│ Conteúdo (editor estruturado com seções pré-definidas)         │
+│ ▸ Objetivos                                                     │
+│ ▸ Requisitos Funcionais                                         │
+│ ▸ Requisitos Não Funcionais                                     │
+│ ▸ Regras de Negócio                                             │
+│ ▸ Restrições                                                    │
+│ ▸ Fluxos                                                        │
+│ ▸ Critérios de Aceite                                           │
+│ ▸ Considerações Técnicas                                        │
+│ ▸ Riscos                                                        │
+├──────────────────────────────────────────────────────────────┤
+│ [Adicionar seção]  [Anexar arquivo]  [Gerar PDF]               │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-# 🎛 11. Simulador de Cenários (avançado)
+# 🧬 5. PRD – Template Oficial (estrutura detalhada)
 
-## 11.1. Tela
-
-```
-Cenário: [Growth Focus ▼]  [Salvar] [Comparar]
-
-Capacidade:
-Squad Alpha   [-10%] ████████░░ [+10%] (360 → 396 pts)
-Squad Beta    [-25%] ██████░░░ [+10%] (300 → 225 pts)
-Squad Gamma   [-15%] █████░░░░ [+10%]
-
-Opções avançadas:
-☑ Incluir contractors (+15% capacidade)
-☑ Considerar férias automaticamente
-☑ Incluir buffer de risco (10%)
-```
-
-## 11.2. Recalcular
+### 5.1. Header
 
 ```
-Com ajustes:
-✓ API v3 cabe no quarter  
-⚠ Analytics Dashboard atrasa 2 semanas  
-✓ Mobile Offline volta ao escopo completo  
+Título  
+Resumo executivo  
+Produto  
+PM responsável  
+Squad  
+Stakeholders envolvidos  
+Versão  
+Vinculado a: Discovery, Épico, Feature  
+Status: Rascunho / Em revisão / Aprovado / Obsoleto  
 ```
 
 ---
 
-# 📜 12. Compromisso Trimestral (Commitment)
+### 5.2. Seções obrigatórias
 
-Tela final para fechar o planejamento.
+#### *1) Objetivo do PRD*
+- O que será entregue  
+- Por que estamos fazendo  
+- Como será medido o sucesso  
+
+#### *2) Contexto*
+- Problema identificado  
+- Dados e evidências  
+- Personas afetadas  
+- Impacto esperado  
+
+#### *3) Escopo Funcional*
+Lista de funcionalidades:
 
 ```
-📜 Commitment Q1 2026
+FUN-01 – Descrição…
+FUN-02 – Descrição…
+```
 
-Épicos Committed:
-✓ API v3 Migration
-✓ Mobile Offline
-✓ Dashboard v2
+#### *4) Fluxos e Jornadas*
+- Diagramas  
+- Mapas de navegação  
+- Estados do sistema  
 
-Épicos Targeted:
-• Webhooks
-• GraphQL Layer
+#### *5) Regras de Negócio*
+```
+RN001 – Se usuário X, então...
+RN002 – Nota fiscal deve...
+```
 
-Épicos Aspirational:
-• ML Insights
-• AR Features
+#### *6) Requisitos Não Funcionais*
+- Performance  
+- Segurança  
+- Auditabilidade  
+- Disponibilidade  
 
-Assinam:
-PMs, Tech Leads, CPO
+#### *7) Dependências*
+- APIs  
+- Banco  
+- Terceiros  
+- Outros módulos  
+
+#### *8) Critérios de Aceite*
+- Casos de teste  
+- Cenários Gherkin (quando necessário)  
+
+#### *9) Riscos*
+- Técnicos  
+- De negócio  
+- Operacionais  
+
+---
+
+# 📘 6. BRD – Template Oficial
+
+O BRD é mais “negócio” e menos técnico.
+
+```
+Visão geral  
+Objetivo da iniciativa  
+Problema de negócio  
+Impacto financeiro  
+Regras regulatórias  
+Stakeholders  
+Restrições  
+KPIs de negócio  
 ```
 
 ---
 
-# 🧱 13. Tabelas de Banco (modelo estendido)
+# 🔧 7. RFC – Template Técnico
 
-## 13.1. Tabela Epico
+Usado por time técnico para mudanças profundas.
 
-| Campo | Tipo |
-|--------|--------|
-| id_epico | UUID |
-| titulo | varchar |
-| descricao | text |
-| produto_id | FK |
-| squad_id | FK |
-| status | enum(planned, in_progress, at_risk, done, on_hold) |
-| health | enum(green, yellow, red) |
-| quarter | varchar |
-| criterios_aceite | text |
-| riscos | text |
-| criado_em | datetime |
-| atualizado_em | datetime |
+```
+Resumo  
+Motivação  
+Alternativas avaliadas  
+Decisão tomada  
+Desenhos técnicos  
+Impacto na arquitetura  
+Impacto em deploys  
+Riscos  
+Plano de rollback  
+```
 
 ---
 
-## 13.2. Tabela Feature
+# 🧪 8. Specs – Especificações Funcionais e Técnicas
 
-| Campo | Tipo |
-|--------|--------|
-| id_feature | UUID |
-| id_epico | FK |
-| titulo | varchar |
-| descricao | text |
-| pontos | int |
-| status | enum |
-| dependencias_json | json |
-| criterios_aceite | text |
-| criado_em | datetime |
+Usado por PM + PO + Devs.
 
----
-
-## 13.3. Tabela Dependencia
-
-| Campo | Tipo |
-|--------|--------|
-| id_dependencia | UUID |
-| id_feature_bloqueada | FK |
-| id_feature_bloqueadora | FK |
-| tipo | enum(hard, soft, recurso) |
-| risco | enum(alto, medio, baixo) |
-| criado_em | datetime |
+```
+Descrição detalhada  
+Estado atual  
+Estado proposto  
+Endpoints (input/output)  
+Validações  
+Padrões de interface  
+Banco de dados  
+Casos extremos  
+Logs  
+Monitoramento  
+```
 
 ---
 
-## 13.4. Tabela Capacity
+# ✏️ 9. Editor Estruturado (UX/UI)
 
-| Campo | Tipo |
-|--------|--------|
-| id_squad | FK |
-| quarter | varchar |
-| capacidade_total | int |
-| capacidade_disponivel | int |
-| capacidade_usada | int |
+O editor deve suportar:
 
----
-
-# 🔍 14. Heurísticas Inteligentes do Sistema
-
-- IA sugere prioridades baseadas em impacto × esforço × histórico  
-- IA detecta atraso e recalcula automaticamente health score  
-- IA sugere dependências escondidas  
-- IA constrói first draft do roadmap  
+- Rich text  
+- Markdown  
+- Anexos  
+- Código (JSON, SQL, API)  
+- Tabelas  
+- Templates conversacionais (AI)  
+- Sugestões automáticas de seções  
+- Drag and drop de blocos  
+- Versões lado a lado (diff view)  
 
 ---
 
-# 🧭 15. Critérios de Sucesso
+# 🔗 10. Vínculos entre Documentos e Artefatos
 
-- Nenhum quarter fecha com mais de 110% de capacidade  
-- 100% dos épicos possuem critérios de aceite  
-- Roadmap atualizado semanalmente automaticamente  
-- Atrasos detectados antes de virar problema crítico  
+Tela de vínculos:
+
+```
+Documento PRD-APIv3
+↓ vinculado a:
+Discovery D-32
+Épico E-12
+Features: F-55, F-56
+Demandas: #31, #86
+```
+
+Tudo deve ser clicável e navegável rapidamente.
+
+---
+
+# 🕒 11. Histórico de Versões e Revisões
+
+```
+Versão 1.4 (15/01/2026) – Revisado por Tech Lead
+Versão 1.3 (12/01/2026) – Adicionado fluxo de login
+Versão 1.2 (09/01/2026) – Ajustes de requisitos
+Versão 1.1 (02/01/2026) – Primeiro rascunho
+Versão 1.0 (01/01/2026) – Criação inicial
+```
+
+Botões:
+
+- [Comparar versões]  
+- [Reverter para versão X]  
+
+---
+
+# 📄 12. Release Notes
+
+Geradas automaticamente a partir de:
+
+- Épicos concluídos  
+- Features concluídas  
+- PRD entregues  
+- Tickets do dev  
+- Commits do repositório  
+- Mensagens do CI/CD  
+
+## Tela:
+
+```
+Release 2026.03 – Fevereiro
+✓ API v3 – Core Services
+✓ Mobile – Offline Mode
+✓ CRM – Módulo de oportunidades v2
+Notas técnicas:
+- Ajustes no cache Redis
+- Melhorias de segurança
+```
+
+---
+
+# 🤖 13. Automação Inteligente (IA)
+
+IA auxilia em:
+
+- Geração de primeira versão de PRD  
+- Síntese automática de entrevistas e evidências  
+- Geração inicial de regras de negócio  
+- Detecção de inconsistências entre PRD ↔ RFC ↔ Specs  
+- Sugestão de cenários de uso  
+- Tradução automática de fluxos em cases Gherkin  
+- Geração automatizada de Release Notes (baseadas em merges)  
+
+---
+
+# 🧱 14. Tabelas de Banco (completo)
+
+Documento
+- id_documento      UUID PK
+- tipo              enum('PRD','BRD','RFC','SPEC','RELEASE_NOTE',...)
+- titulo            varchar
+- resumo            text
+- id_versao_atual   UUID FK → DocumentoVersao
+- status            enum('rascunho','revisao','aprovado','obsoleto')
+- id_produto        FK Produto
+- id_pm             FK Usuario
+- id_squad          FK Squad
+- id_tenant         FK Tenant (opcional, mas recomendo)
+- criado_por        FK Usuario
+- criado_em         datetime
+- atualizado_em     datetime
+📄 DocumentoVersao
+text
+Copiar código
+DocumentoVersao
+- id_versao         UUID PK
+- id_documento      UUID FK
+- versao            varchar (ex: "1.3")
+- conteudo_json     jsonb
+- changelog_resumo  text
+- criado_por        FK Usuario
+- criado_em         datetime
+🔗 Vínculos
+text
+Copiar código
+DocumentoVinculo
+- id_vinculo        UUID PK
+- id_documento      UUID FK
+- tipo_alvo         enum('discovery','epico','feature','demanda','release')
+- id_alvo           UUID/bigint
+- criado_por        FK Usuario
+- criado_em         datetime
+🏷️ Tags
+text
+Copiar código
+Tag
+- id_tag           UUID PK
+- nome             varchar unique
+
+DocumentoTag
+- id_documento     UUID FK
+- id_tag           UUID FK
+- criado_em        datetime
+📎 Anexos
+text
+Copiar código
+DocumentoAnexo
+- id_anexo         UUID PK
+- id_versao        UUID FK → DocumentoVersao
+- url              varchar
+- tipo_mime        varchar
+- nome_arquivo     varchar
+- tamanho_bytes    bigint
+- criado_por       FK Usuario
+- criado_em        datetime
+💬 Comentários
+text
+Copiar código
+DocumentoComentario
+- id_comentario        UUID PK
+- id_versao            UUID FK → DocumentoVersao
+- id_usuario           FK Usuario
+- texto                text
+- criado_em            datetime
+- id_comentario_pai    UUID (para threads)
+- resolvido            bool
+- tipo                 enum('comentario','sugestao','bloqueador','aprovacao')
+✅ Aprovações (opcional mas muito útil)
+text
+Copiar código
+DocumentoAprovacao
+- id_aprovacao     UUID PK
+- id_versao        UUID FK
+- tipo_aprovacao   enum('negocio','tecnica','ux','compliance')
+- aprovado_por     FK Usuario
+- aprovado_em      datetime
+- status           enum('pendente','aprovado','reprovado')
+- comentario       text
+
+---
+
+# 📊 15. Indicadores (sem módulo de métricas ainda)
+
+- % de PRDs aprovados no quarter  
+- Tempo médio de revisão  
+- Número de versões por documento  
+- % de documentos com critérios de aceite  
+- Documentos órfãos (sem vínculo)  
+
+---
+
+# 🧭 16. Critérios de Sucesso
+
+- Documentação consistente e rastreável  
+- Todo épico tem um PRD  
+- Toda RFC possui decisor técnico  
+- Release Notes são geradas automaticamente  
+- Revisões transparentes e versionadas  
 
 ---
 
 # 📦 Próximo módulo
-## **Módulo 5 – Documentação de Produto (PRD, BRD, RFC, Specs, Release Notes)**  
-Posso gerar agora se desejar.
+## **Módulo 6 – Validação & Go-To-Market**  
+(gero quando quiser)
 
